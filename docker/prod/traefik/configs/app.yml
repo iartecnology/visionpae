@@ -1,0 +1,79 @@
+http:
+  routers:
+    api:
+      rule: "Host(`api.pae.co`)"
+      service: api
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - rate-limit
+        - cors-headers
+
+    web:
+      rule: "Host(`app.pae.co`) || HostRegex(`{subdomain:[a-z]+}.app.pae.co`)"
+      service: web
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+    sync:
+      rule: "Host(`sync.pae.co`)"
+      service: sync
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+    monitoring:
+      rule: "Host(`monit.pae.co`)"
+      service: grafana
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - auth-basic
+
+  services:
+    api:
+      loadBalancer:
+        servers:
+          - url: "http://api:3001"
+        healthCheck:
+          path: /health
+          interval: 30s
+    web:
+      loadBalancer:
+        servers:
+          - url: "http://web:3000"
+    sync:
+      loadBalancer:
+        servers:
+          - url: "http://mobile-sync:3002"
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
+    cors-headers:
+      headers:
+        accessControlAllowOriginList:
+          - "https://app.pae.co"
+          - "https://*.app.pae.co"
+        accessControlAllowMethods:
+          - GET, POST, PUT, PATCH, DELETE, OPTIONS
+        accessControlAllowHeaders:
+          - Content-Type, Authorization, X-Tenant-Id
+        accessControlAllowCredentials: true
+    auth-basic:
+      basicAuth:
+        users:
+          - "admin:$2y$10$..."

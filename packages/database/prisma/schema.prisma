@@ -1,0 +1,855 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// TENANT & USUARIOS
+// ============================================================
+
+model Tenant {
+  id            String   @id @default(uuid()) @db.Uuid
+  nombre        String   @db.VarChar(255)
+  slug          String   @unique @db.VarChar(100)
+  codigoDane    String   @map("codigo_dane") @db.VarChar(5)
+  departamento  String   @db.VarChar(100)
+  tipo          TenantType
+  config        Json     @default("{}") @db.JsonB
+  logoUrl       String?  @map("logo_url")
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  usuarios       User[]
+  productores    Productor[]
+  productos      ProductoOfrecido[]
+  contratos      ContratoMarco[]
+  ordenes        OrdenCompra[]
+  certificaciones CertificacionInsuficiencia[]
+  recetas        Receta[]
+  planes         PlanSemanal[]
+  ruedas         RuedaNegocio[]
+  incidencias    IncidenciaCampo[]
+  actas          ActaRecibo[]
+  notificaciones Notificacion[]
+  featureFlags   FeatureFlag[]
+  syncBatches    SyncBatch[]
+
+  @@map("tenants")
+}
+
+enum TenantType {
+  municipio
+  gobernacion
+  hospital
+  icbf
+  operador_pae
+  secretaria_educacion
+}
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  email           String   @db.VarChar(255)
+  passwordHash    String   @map("password_hash")
+  nombreCompleto  String   @map("nombre_completo") @db.VarChar(255)
+  tipoDocumento   TipoDocumento @map("tipo_documento")
+  numeroDocumento String   @map("numero_documento") @db.VarChar(50)
+  rol             UserRole
+  telefono        String?  @db.VarChar(20)
+  avatarUrl       String?  @map("avatar_url")
+  idioma          String   @default("es") @db.VarChar(5)
+  ultimoAcceso    DateTime? @map("ultimo_acceso")
+  activo          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  refreshTokens  RefreshToken[]
+  auditorias     AuditLog[]
+  notificaciones Notificacion[]
+  incidenciasReportadas IncidenciaCampo[] @relation("incidencia_reported_by")
+  incidenciasResueltas  IncidenciaCampo[] @relation("incidencia_resolved_by")
+  actas                 ActaRecibo[]     @relation("ActaRecibo_interventor")
+  syncBatches    SyncBatch[]
+
+  @@unique([tenantId, email])
+  @@map("users")
+}
+
+enum TipoDocumento {
+  CC
+  NIT
+  CE
+  Pasaporte
+  otro
+}
+
+enum UserRole {
+  super_admin
+  admin_entidad
+  operador
+  productor
+  interventor
+  auditor
+  mesa_tecnica
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  deviceInfo String? @map("device_info")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model AuditLog {
+  id         BigInt   @id @default(autoincrement())
+  tenantId   String   @map("tenant_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  accion     String   @db.VarChar(100)
+  entidad    String   @db.VarChar(100)
+  entidadId  String   @map("entidad_id") @db.Uuid
+  datosPrevios Json?  @map("datos_previos") @db.JsonB
+  datosNuevos  Json?  @map("datos_nuevos") @db.JsonB
+  ipOrigen   String?  @map("ip_origen")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([entidad, entidadId])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// CATÁLOGOS TERRITORIALES DANE
+// ============================================================
+
+model Departamento {
+  codigo    String   @id @db.VarChar(2)
+  nombre    String   @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  municipios Municipio[]
+
+  @@map("departamentos")
+}
+
+model Municipio {
+  codigo              String        @id @db.VarChar(5)
+  codigoDepartamento  String        @map("codigo_departamento") @db.VarChar(2)
+  nombre              String        @db.VarChar(100)
+  tipo                String        @default("municipio") @db.VarChar(50)
+  createdAt           DateTime      @default(now()) @map("created_at")
+
+  departamento Departamento @relation(fields: [codigoDepartamento], references: [codigo])
+  veredas      Vereda[]
+
+  @@map("municipios")
+}
+
+model Vereda {
+  codigo            String    @id @db.VarChar(11)
+  codigoMunicipio   String    @map("codigo_municipio") @db.VarChar(5)
+  nombre            String    @db.VarChar(255)
+  ubicacion         String? @map("ubicacion")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  municipio Municipio @relation(fields: [codigoMunicipio], references: [codigo])
+
+  @@map("veredas")
+}
+
+// ============================================================
+// RUPL — REGISTRO ÚNICO DE PRODUCTORES LOCALES
+// ============================================================
+
+enum TipoPersona {
+  natural
+  asociacion
+  acfc
+  comunidad_etnica
+}
+
+enum EstadoProductor {
+  activo
+  inactivo
+  en_acreditacion
+  vencido
+}
+
+enum EstratoProductor {
+  campesino
+  pequeno
+  mediano
+}
+
+model Productor {
+  id                 String           @id @default(uuid()) @db.Uuid
+  tenantId           String           @map("tenant_id") @db.Uuid
+  userId             String?          @map("user_id") @db.Uuid
+  tipoPersona        TipoPersona      @map("tipo_persona")
+  tipoDocumento      TipoDocumento    @map("tipo_documento")
+  numeroDocumento    String           @map("numero_documento") @db.VarChar(50)
+  razonSocial        String           @map("razon_social") @db.VarChar(255)
+  nombreComercial    String?          @map("nombre_comercial") @db.VarChar(255)
+  direccionPredio    String?          @map("direccion_predio") @db.VarChar(255)
+  telefonoContacto   String?          @map("telefono_contacto") @db.VarChar(20)
+  email              String?          @db.VarChar(255)
+  codigoVereda       String?          @map("codigo_vereda") @db.VarChar(11)
+  codigoMunicipio    String           @map("codigo_municipio") @db.VarChar(5)
+  codigoDepartamento String           @map("codigo_departamento") @db.VarChar(2)
+  ubicacion          String?
+  estrato            EstratoProductor @default(campesino)
+  esComunidadEtnica  Boolean          @default(false) @map("es_comunidad_etnica")
+  etnia              String?          @db.VarChar(100)
+  estado             EstadoProductor  @default(en_acreditacion)
+  calificacionPromedio Decimal        @default(0) @map("calificacion_promedio") @db.Decimal(3, 2)
+  totalVentas        Decimal          @default(0) @map("total_ventas") @db.Decimal(14, 2)
+  ultimaVenta        DateTime?        @map("ultima_venta")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  tenant      Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  documentos  DocumentoAcreditacion[]
+  productos   ProductoOfrecido[]
+  transacciones TransaccionHistorial[]
+  ordenes     OrdenCompra[]
+  matchs      MatchOfertaDemanda[]
+  actas       ActaRecibo[]         @relation("ActaRecibo_productor")
+
+  @@unique([tenantId, numeroDocumento])
+  @@index([tenantId, estado])
+  @@index([codigoMunicipio])
+  @@map("productores")
+}
+
+model DocumentoAcreditacion {
+  id                    String        @id @default(uuid()) @db.Uuid
+  productorId           String        @map("productor_id") @db.Uuid
+  tipo                  TipoDocumentoAcreditacion
+  archivoUrl            String        @map("archivo_url")
+  tamanoBytes           Int?          @map("tamano_bytes")
+  mimeType              String?       @map("mime_type") @db.VarChar(50)
+  fechaExpedicion       DateTime      @map("fecha_expedicion")
+  fechaVencimiento      DateTime?     @map("fecha_vencimiento")
+  diasAvisoVencimiento  Int           @default(30) @map("dias_aviso_vencimiento")
+  notificadoVencimiento Boolean       @default(false) @map("notificado_vencimiento")
+  verificado            Boolean       @default(false)
+  verificadoPor         String?       @map("verificado_por") @db.Uuid
+  verificadoEn          DateTime?     @map("verificado_en")
+  createdAt             DateTime      @default(now()) @map("created_at")
+
+  productor Productor @relation(fields: [productorId], references: [id], onDelete: Cascade)
+
+  @@map("documentos_acreditacion")
+}
+
+enum TipoDocumentoAcreditacion {
+  registro_ica
+  camara_comercio
+  rut
+  certificacion_bpa
+  certificacion_origen_etnico
+  certificacion_asociacion
+  otro
+}
+
+enum CategoriaProducto {
+  fruta
+  verdura
+  lacteo
+  carnes
+  granos
+  panaderia
+  preparaciones
+  bebidas
+  huevos
+  tuberculos
+  otros
+}
+
+enum UnidadMedida {
+  kg
+  lb
+  unidad
+  litro
+  docena
+  arroba
+  bulto
+  caneca
+}
+
+model ProductoOfrecido {
+  id                        String          @id @default(uuid()) @db.Uuid
+  productorId               String          @map("productor_id") @db.Uuid
+  tenantId                  String          @map("tenant_id") @db.Uuid
+  nombre                    String          @db.VarChar(255)
+  categoria                 CategoriaProducto
+  unidadMedida              UnidadMedida    @map("unidad_medida")
+  volumenDisponible         Decimal         @map("volumen_disponible") @db.Decimal(12, 2)
+  volumenMinimo             Decimal?        @map("volumen_minimo") @db.Decimal(12, 2)
+  precioReferencia          Decimal?        @map("precio_referencia") @db.Decimal(14, 2)
+  moneda                    String          @default("COP") @db.VarChar(3)
+  estacionalidad            Json?           @db.JsonB
+  capacidadProduccionMensual Decimal?        @map("capacidad_produccion_mensual") @db.Decimal(12, 2)
+  certificaciones           String[]        @default([])
+  activo                    Boolean         @default(true)
+  createdAt                 DateTime        @default(now()) @map("created_at")
+  updatedAt                 DateTime        @updatedAt @map("updated_at")
+
+  productor      Productor        @relation(fields: [productorId], references: [id], onDelete: Cascade)
+  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  itemsOrden     ItemOrdenCompra[]
+
+  @@index([tenantId, categoria, activo])
+  @@map("productos_ofrecidos")
+}
+
+enum TipoTransaccion {
+  venta
+  devolucion
+  ajuste_pago
+}
+
+model TransaccionHistorial {
+  id          String           @id @default(uuid()) @db.Uuid
+  tenantId    String           @map("tenant_id") @db.Uuid
+  productorId String           @map("productor_id") @db.Uuid
+  ordenId     String?          @map("orden_id") @db.Uuid
+  tipo        TipoTransaccion
+  monto       Decimal          @db.Decimal(14, 2)
+  volumen     Decimal          @db.Decimal(12, 2)
+  fecha       DateTime
+  descripcion String?          @db.Text
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  productor Productor @relation(fields: [productorId], references: [id])
+
+  @@index([tenantId, productorId])
+  @@map("transacciones_historial")
+}
+
+// ============================================================
+// MOTOR DE COMPRAS Y CUMPLIMIENTO 30%
+// ============================================================
+
+enum TipoContrato {
+  anual
+  plurianual
+}
+
+enum EstadoContrato {
+  borrador
+  activo
+  suspendido
+  cerrado
+}
+
+model ContratoMarco {
+  id                      String         @id @default(uuid()) @db.Uuid
+  tenantId                String         @map("tenant_id") @db.Uuid
+  numero                  String         @db.VarChar(50)
+  operadorId              String         @map("operador_id") @db.Uuid
+  objeto                  String         @db.Text
+  periodoInicio           DateTime       @map("periodo_inicio")
+  periodoFin              DateTime       @map("periodo_fin")
+  valorTotal              Decimal        @map("valor_total") @db.Decimal(14, 2)
+  presupuestoComprasLocales Decimal      @map("presupuesto_compras_locales") @db.Decimal(14, 2)
+  tipo                    TipoContrato   @default(anual)
+  estado                  EstadoContrato @default(borrador)
+  fechaCierre             DateTime?      @map("fecha_cierre")
+  createdBy               String         @map("created_by") @db.Uuid
+  createdAt               DateTime       @default(now()) @map("created_at")
+  updatedAt               DateTime       @updatedAt @map("updated_at")
+
+  tenant     Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ordenes    OrdenCompra[]
+  certificaciones CertificacionInsuficiencia[]
+
+  @@unique([tenantId, numero])
+  @@map("contratos_marco")
+}
+
+enum EstadoOrden {
+  borrador
+  emitida
+  confirmada
+  entregada_parcial
+  entregada
+  facturada
+  anulada
+}
+
+model OrdenCompra {
+  id                      String       @id @default(uuid()) @db.Uuid
+  tenantId                String       @map("tenant_id") @db.Uuid
+  contratoId              String       @map("contrato_id") @db.Uuid
+  numero                  String       @db.VarChar(50)
+  productorId             String       @map("productor_id") @db.Uuid
+  fechaEmision            DateTime     @map("fecha_emision")
+  fechaEntregaProgramada  DateTime     @map("fecha_entrega_programada")
+  fechaEntregaReal        DateTime?    @map("fecha_entrega_real")
+  valorTotal              Decimal      @map("valor_total") @db.Decimal(14, 2)
+  esLocal                 Boolean      @default(true) @map("es_local")
+  fundamentoLegal         String?      @map("fundamento_legal") @db.VarChar(255)
+  distanciaKm             Decimal?     @map("distancia_km") @db.Decimal(8, 2)
+  certificacionId         String?      @map("certificacion_id") @db.Uuid
+  estado                  EstadoOrden  @default(borrador)
+  creadoPor               String       @map("creado_por") @db.Uuid
+  latitudEntrega          Decimal?     @map("latitud_entrega") @db.Decimal(10, 7)
+  longitudEntrega         Decimal?     @map("longitud_entrega") @db.Decimal(10, 7)
+  fotoEntregaUrl          String?      @map("foto_entrega_url")
+  actaReciboId            String?      @map("acta_recibo_id") @db.Uuid
+  createdAt               DateTime     @default(now()) @map("created_at")
+  updatedAt               DateTime     @updatedAt @map("updated_at")
+
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contrato   ContratoMarco       @relation(fields: [contratoId], references: [id])
+  productor  Productor           @relation(fields: [productorId], references: [id])
+  items      ItemOrdenCompra[]
+  incidencias IncidenciaCampo[]
+  acta       ActaRecibo?         @relation("ActaRecibo_orden")
+
+  @@unique([tenantId, numero])
+  @@index([tenantId, contratoId, esLocal])
+  @@index([tenantId, fechaEmision])
+  @@map("ordenes_compra")
+}
+
+model ItemOrdenCompra {
+  id                 String       @id @default(uuid()) @db.Uuid
+  ordenId            String       @map("orden_id") @db.Uuid
+  productoId         String       @map("producto_id") @db.Uuid
+  nombreProducto     String       @map("nombre_producto") @db.VarChar(255)
+  cantidadSolicitada Decimal       @map("cantidad_solicitada") @db.Decimal(12, 2)
+  unidadMedida       UnidadMedida @map("unidad_medida")
+  precioUnitario     Decimal      @map("precio_unitario") @db.Decimal(14, 2)
+  subtotal           Decimal      @db.Decimal(14, 2)
+  cantidadRecibida   Decimal?     @map("cantidad_recibida") @db.Decimal(12, 2)
+  conforme           Boolean?
+  incidenciaId       String?      @map("incidencia_id") @db.Uuid
+
+  orden      OrdenCompra       @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+  producto   ProductoOfrecido  @relation(fields: [productoId], references: [id])
+
+  @@map("items_orden_compra")
+}
+
+// ============================================================
+// CERTIFICACIÓN DE INSUFICIENCIA DE OFERTA
+// ============================================================
+
+enum EstadoCertificacion {
+  en_elaboracion
+  en_revision_mesa
+  aprobada
+  rechazada
+  subsanada
+}
+
+enum TipoEvidencia {
+  consulta_productores
+  brecha_volumen
+  imposibilidad_geografica
+  imposibilidad_temporal
+  acta_mesa
+  otra
+}
+
+model CertificacionInsuficiencia {
+  id                    String               @id @default(uuid()) @db.Uuid
+  tenantId              String               @map("tenant_id") @db.Uuid
+  numeroExpediente      String               @unique @map("numero_expediente") @db.VarChar(50)
+  contratoId            String               @map("contrato_id") @db.Uuid
+  productoCategoria     CategoriaProducto    @map("producto_categoria")
+  volumenRequeridoMensual Decimal             @map("volumen_requerido_mensual") @db.Decimal(12, 2)
+  estado                EstadoCertificacion  @default(en_elaboracion)
+  fechaSolicitud        DateTime             @default(now()) @map("fecha_solicitud")
+  fechaResolucion       DateTime?            @map("fecha_resolucion")
+  resueltoPor           String?              @map("resuelto_por") @db.Uuid
+  dictamen              String?              @db.Text
+  periodoInicio         DateTime             @map("periodo_inicio")
+  periodoFin            DateTime             @map("periodo_fin")
+  createdBy             String               @map("created_by") @db.Uuid
+  createdAt             DateTime             @default(now()) @map("created_at")
+  updatedAt             DateTime             @updatedAt @map("updated_at")
+
+  tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contrato   ContratoMarco @relation(fields: [contratoId], references: [id])
+  evidencias EvidenciaInsuficiencia[]
+  referenciados ProductorReferenciadoNoLocal[]
+
+  @@map("certificaciones_insuficiencia")
+}
+
+model EvidenciaInsuficiencia {
+  id               String        @id @default(uuid()) @db.Uuid
+  certificacionId  String        @map("certificacion_id") @db.Uuid
+  tipo             TipoEvidencia
+  descripcion      String        @db.Text
+  archivoUrl       String?       @map("archivo_url")
+  datos            Json?         @db.JsonB
+  createdBy        String        @map("created_by") @db.Uuid
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  certificacion CertificacionInsuficiencia @relation(fields: [certificacionId], references: [id], onDelete: Cascade)
+
+  @@map("evidencias_insuficiencia")
+}
+
+model ProductorReferenciadoNoLocal {
+  id                String   @id @default(uuid()) @db.Uuid
+  certificacionId   String   @map("certificacion_id") @db.Uuid
+  nombre            String   @db.VarChar(255)
+  ubicacion         String   @db.VarChar(255)
+  departamento      String?  @db.VarChar(100)
+  municipio         String?  @db.VarChar(100)
+  productosOfrecidos String[] @map("productos_ofrecidos")
+  volumenDisponible Decimal  @map("volumen_disponible") @db.Decimal(12, 2)
+  precioReferencia  Decimal? @map("precio_referencia") @db.Decimal(14, 2)
+  justificacion     String?  @db.Text
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  certificacion CertificacionInsuficiencia @relation(fields: [certificacionId], references: [id], onDelete: Cascade)
+
+  @@map("productores_referenciados_no_local")
+}
+
+// ============================================================
+// MINUTAS Y MENÚS
+// ============================================================
+
+enum CategoriaComida {
+  desayuno
+  almuerzo
+  cena
+  refrigerio
+}
+
+enum DificultadReceta {
+  baja
+  media
+  alta
+}
+
+model Receta {
+  id                   String          @id @default(uuid()) @db.Uuid
+  tenantId             String          @map("tenant_id") @db.Uuid
+  nombre               String          @db.VarChar(255)
+  categoriaComida      CategoriaComida @map("categoria_comida")
+  porciones            Int
+  tiempoPreparacionMin Int             @map("tiempo_preparacion_min")
+  instrucciones        String          @db.Text
+  dificultad           DificultadReceta @default(media)
+  valorNutricional     Json?           @map("valor_nutricional") @db.JsonB
+  temporadaRecomendada Int[]           @map("temporada_recomendada")
+  etiquetaCultural     String[]        @map("etiqueta_cultural")
+  fotoUrl              String?         @map("foto_url")
+  activo               Boolean         @default(true)
+  createdBy            String          @map("created_by") @db.Uuid
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ingredientes IngredienteReceta[]
+  planItems    PlanSemanalItem[]
+
+  @@map("recetas")
+}
+
+model IngredienteReceta {
+  id                String          @id @default(uuid()) @db.Uuid
+  recetaId          String          @map("receta_id") @db.Uuid
+  categoriaProducto CategoriaProducto @map("categoria_producto")
+  nombre            String          @db.VarChar(255)
+  cantidad          Decimal         @db.Decimal(10, 2)
+  unidad            UnidadMedida
+  opcional          Boolean         @default(false)
+  sustitutoPosible  String?         @map("sustituto_posible") @db.VarChar(255)
+
+  receta Receta @relation(fields: [recetaId], references: [id], onDelete: Cascade)
+
+  @@map("ingredientes_receta")
+}
+
+enum EstadoPlan {
+  borrador
+  publicado
+  ejecutado
+}
+
+model PlanSemanal {
+  id                       String      @id @default(uuid()) @db.Uuid
+  tenantId                 String      @map("tenant_id") @db.Uuid
+  nombre                   String      @db.VarChar(255)
+  fechaInicio              DateTime    @map("fecha_inicio")
+  fechaFin                 DateTime    @map("fecha_fin")
+  estado                   EstadoPlan  @default(borrador)
+  requerimientosNutricionales Json?    @map("requerimientos_nutricionales") @db.JsonB
+  observaciones            String?     @db.Text
+  createdBy                String      @map("created_by") @db.Uuid
+  createdAt                DateTime    @default(now()) @map("created_at")
+  updatedAt                DateTime    @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items  PlanSemanalItem[]
+
+  @@map("planes_semanales")
+}
+
+model PlanSemanalItem {
+  id                String        @id @default(uuid()) @db.Uuid
+  planId            String        @map("plan_id") @db.Uuid
+  recetaId          String        @map("receta_id") @db.Uuid
+  diaSemana         Int           @map("dia_semana")
+  tipoComida        CategoriaComida @map("tipo_comida")
+  porcionesEstimadas Int          @map("porciones_estimadas")
+  generadoAuto      Boolean       @default(false) @map("generado_auto")
+
+  plan   PlanSemanal @relation(fields: [planId], references: [id], onDelete: Cascade)
+  receta Receta      @relation(fields: [recetaId], references: [id])
+
+  @@map("planes_semanales_items")
+}
+
+// ============================================================
+// RUEDAS DE NEGOCIO
+// ============================================================
+
+enum TipoRueda {
+  presencial
+  virtual
+  mixta
+}
+
+enum EstadoRueda {
+  programada
+  activa
+  finalizada
+  cancelada
+}
+
+model RuedaNegocio {
+  id         String      @id @default(uuid()) @db.Uuid
+  tenantId   String      @map("tenant_id") @db.Uuid
+  nombre     String      @db.VarChar(255)
+  fecha      DateTime
+  lugar      String      @db.VarChar(255)
+  descripcion String?    @db.Text
+  tipo       TipoRueda   @default(presencial)
+  estado     EstadoRueda @default(programada)
+  createdBy  String      @map("created_by") @db.Uuid
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  tenant  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  demandas DemandaRueda[]
+  matches MatchOfertaDemanda[]
+
+  @@map("ruedas_negocio")
+}
+
+model DemandaRueda {
+  id                String   @id @default(uuid()) @db.Uuid
+  ruedaId           String   @map("rueda_id") @db.Uuid
+  entidadNombre     String   @map("entidad_nombre") @db.VarChar(255)
+  entidadMunicipio  String?  @map("entidad_municipio") @db.VarChar(100)
+  productosRequeridos Json   @map("productos_requeridos") @db.JsonB
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  rueda   RuedaNegocio @relation(fields: [ruedaId], references: [id], onDelete: Cascade)
+  matches MatchOfertaDemanda[]
+
+  @@map("demandas_rueda")
+}
+
+enum EstadoMatch {
+  propuesto
+  contactado
+  concretado
+  cerrado
+}
+
+model MatchOfertaDemanda {
+  id               String       @id @default(uuid()) @db.Uuid
+  ruedaId          String       @map("rueda_id") @db.Uuid
+  demandaId        String       @map("demanda_id") @db.Uuid
+  productorId      String       @map("productor_id") @db.Uuid
+  productoMatch    String       @map("producto_match") @db.VarChar(255)
+  volumenOfrecido  Decimal      @map("volumen_ofrecido") @db.Decimal(12, 2)
+  precioOfertado   Decimal?     @map("precio_ofertado") @db.Decimal(14, 2)
+  distanciaKm      Decimal?     @map("distancia_km") @db.Decimal(8, 2)
+  estado           EstadoMatch  @default(propuesto)
+  matchAutomatico  Boolean      @default(false) @map("match_automatico")
+  createdAt        DateTime     @default(now()) @map("created_at")
+
+  rueda     RuedaNegocio @relation(fields: [ruedaId], references: [id], onDelete: Cascade)
+  demanda   DemandaRueda @relation(fields: [demandaId], references: [id])
+  productor Productor    @relation(fields: [productorId], references: [id])
+
+  @@map("matches_oferta_demanda")
+}
+
+// ============================================================
+// MÓVIL — SINCRONIZACIÓN E INCIDENCIAS
+// ============================================================
+
+enum TipoDispositivo {
+  productor
+  interventor
+}
+
+enum EstadoSync {
+  synced
+  pending_sync
+  conflict
+}
+
+model SyncBatch {
+  id                   String         @id @default(uuid()) @db.Uuid
+  tenantId             String         @map("tenant_id") @db.Uuid
+  dispositivoId        String         @map("dispositivo_id") @db.VarChar(255)
+  userId               String         @map("user_id") @db.Uuid
+  tipoDispositivo      TipoDispositivo @map("tipo_dispositivo")
+  ultimoSyncPull       DateTime?      @map("ultimo_sync_pull")
+  ultimoSyncPush       DateTime?      @map("ultimo_sync_push")
+  cambiosPendientes    Int            @default(0) @map("cambios_pendientes")
+  estado               EstadoSync     @default(synced)
+  modelosSincronizados String[]       @map("modelos_sincronizados")
+  createdAt            DateTime       @default(now()) @map("created_at")
+  updatedAt            DateTime       @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([tenantId, dispositivoId])
+  @@map("sync_batches")
+}
+
+enum TipoIncidencia {
+  calidad_insuficiente
+  retraso_entrega
+  cantidad_incompleta
+  producto_no_corresponde
+  empaque_inadecuado
+  otra
+}
+
+enum EstadoIncidencia {
+  abierta
+  en_gestion
+  resuelta
+  cerrada
+}
+
+model IncidenciaCampo {
+  id             String            @id @default(uuid()) @db.Uuid
+  tenantId       String            @map("tenant_id") @db.Uuid
+  ordenId        String            @map("orden_id") @db.Uuid
+  reportadoPor   String            @map("reportado_por") @db.Uuid
+  tipo           TipoIncidencia
+  descripcion    String            @db.Text
+  fotoUrls       String[]          @map("foto_urls")
+  latitud        Decimal?          @map("latitud") @db.Decimal(10, 7)
+  longitud       Decimal?          @map("longitud") @db.Decimal(10, 7)
+  fechaReporte   DateTime          @default(now()) @map("fecha_reporte")
+  estado         EstadoIncidencia  @default(abierta)
+  resueltoPor    String?           @map("resuelto_por") @db.Uuid
+  resolucion     String?           @db.Text
+  fechaResolucion DateTime?        @map("fecha_resolucion")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  tenant   Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orden    OrdenCompra @relation(fields: [ordenId], references: [id])
+  reportado User       @relation("incidencia_reported_by", fields: [reportadoPor], references: [id])
+  resuelto User?       @relation("incidencia_resolved_by", fields: [resueltoPor], references: [id])
+
+  @@map("incidencias_campo")
+}
+
+model ActaRecibo {
+  id                  String   @id @default(uuid()) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  ordenId             String   @unique @map("orden_id") @db.Uuid
+  interventorId       String   @map("interventor_id") @db.Uuid
+  productorId         String   @map("productor_id") @db.Uuid
+  fechaVisita         DateTime @map("fecha_visita")
+  geolocalizacion     Json?    @db.JsonB
+  itemsVerificados    Json?    @map("items_verificados") @db.JsonB
+  firmaInterventorUrl String?  @map("firma_interventor_url")
+  firmaProductorUrl   String?  @map("firma_productor_url")
+  actaPdfUrl          String?  @map("acta_pdf_url")
+  estado              String   @default("borrador") @db.VarChar(20)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orden      OrdenCompra @relation("ActaRecibo_orden", fields: [ordenId], references: [id])
+  interventor User       @relation("ActaRecibo_interventor", fields: [interventorId], references: [id])
+  productor   Productor  @relation("ActaRecibo_productor", fields: [productorId], references: [id])
+
+  @@map("actas_recibo")
+}
+
+// ============================================================
+// NOTIFICACIONES Y CONFIGURACIÓN
+// ============================================================
+
+enum TipoNotificacion {
+  alerta_cumplimiento
+  vencimiento_documento
+  oferta_rueda
+  nueva_orden
+  incidencia
+  certificacion_resuelta
+  sistema
+}
+
+model Notificacion {
+  id        String            @id @default(uuid()) @db.Uuid
+  tenantId  String            @map("tenant_id") @db.Uuid
+  userId    String            @map("user_id") @db.Uuid
+  tipo      TipoNotificacion
+  titulo    String            @db.VarChar(255)
+  mensaje   String            @db.Text
+  link      String?           @db.VarChar(500)
+  leida     Boolean           @default(false)
+  fecha     DateTime          @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([userId, leida])
+  @@map("notificaciones")
+}
+
+model FeatureFlag {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  flag       String   @db.VarChar(100)
+  habilitado Boolean  @default(false)
+  config     Json?    @db.JsonB
+  updatedBy  String?  @map("updated_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, flag])
+  @@map("feature_flags")
+}
+
+
+

@@ -1,0 +1,17 @@
+FROM node:20-bookworm-slim AS base
+RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client openssl && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.json ./
+COPY packages/ packages/
+COPY apps/api/ apps/api/
+
+FROM base AS dev
+RUN rm -f tsconfig.tsbuildinfo && pnpm install --frozen-lockfile && \
+    cd packages/engine && pnpm build && cd /app && \
+    cd packages/shared && pnpm build && cd /app && \
+    cd apps/api && pnpm db:generate && pnpm build
+COPY apps/api/docker-entrypoint.dev.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+EXPOSE 3001
+ENTRYPOINT ["docker-entrypoint.sh"]

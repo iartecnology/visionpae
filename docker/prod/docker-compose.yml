@@ -1,0 +1,155 @@
+services:
+  traefik:
+    container_name: VisionPAE-Traefik
+    image: traefik:v3.0
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/traefik.prod.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/configs:/etc/traefik/configs:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - pae-net
+
+  api:
+    container_name: VisionPAE
+    image: ghcr.io/${GITHUB_REPOSITORY:-visionpae}/api:${IMAGE_TAG:-latest}
+    restart: always
+    env_file: ../../.env.production
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - pae-net
+
+  web:
+    container_name: VisionPAE-Web
+    image: ghcr.io/${GITHUB_REPOSITORY:-visionpae}/web:${IMAGE_TAG:-latest}
+    restart: always
+    env_file: ../../.env.production
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - api
+    networks:
+      - pae-net
+
+  worker:
+    container_name: VisionPAE-Worker
+    image: ghcr.io/${GITHUB_REPOSITORY:-visionpae}/worker:${IMAGE_TAG:-latest}
+    restart: always
+    env_file: ../../.env.production
+    depends_on:
+      - db
+      - redis
+    networks:
+      - pae-net
+
+  mobile-sync:
+    container_name: VisionPAE-MobileSync
+    image: ghcr.io/${GITHUB_REPOSITORY:-visionpae}/mobile-sync:${IMAGE_TAG:-latest}
+    restart: always
+    env_file: ../../.env.production
+    depends_on:
+      - db
+      - redis
+    networks:
+      - pae-net
+
+  db:
+    container_name: VisionPAE-Database
+    image: postgis/postgis:16-3.4
+    restart: always
+    environment:
+      POSTGRES_DB: pae_prod
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d pae_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - pae-net
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: "4G"
+
+  redis:
+    container_name: VisionPAE-Redis
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASS}
+    volumes:
+      - redis_prod:/data
+    networks:
+      - pae-net
+
+  minio:
+    container_name: VisionPAE-MinIO
+    image: minio/minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_prod:/data
+    command: server /data
+    networks:
+      - pae-net
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - pae-net
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - pae-net
+
+  pgbackup:
+    image: prodrigestivill/postgres-backup-local
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: pae_prod
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      SCHEDULE: "0 3 * * *"
+      BACKUP_DIR: /backups
+      BACKUP_KEEP_DAYS: 30
+    volumes:
+      - backups:/backups
+    networks:
+      - pae-net
+
+volumes:
+  pgdata_prod:
+  redis_prod:
+  minio_prod:
+  prometheus_data:
+  grafana_data:
+  backups:
+  traefik_letsencrypt:
+
+networks:
+  pae-net:
+    driver: overlay
