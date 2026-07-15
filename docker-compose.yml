@@ -38,8 +38,9 @@ services:
     container_name: VisionPAE
     restart: unless-stopped
     ports:
-      - "3000:3000"
-      - "3001:3001"
+      - "8080:3000"
+      - "8081:3001"
+      - "8082:3002"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://${DB_USER:-pae}:${DB_PASS:-pae_prod_pass}@db:5432/${POSTGRES_DB:-pae_prod}

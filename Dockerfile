@@ -19,7 +19,7 @@ RUN cd packages/engine && pnpm build && cd /app && \
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-EXPOSE 3000 3001 3002
+EXPOSE 3000 3001
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
