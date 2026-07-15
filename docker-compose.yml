@@ -1,0 +1,65 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: VisionPAE-Database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pae_prod}
+      POSTGRES_USER: ${DB_USER:-pae}
+      POSTGRES_PASSWORD: ${DB_PASS:-pae_prod_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-pae} -d ${POSTGRES_DB:-pae_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pae-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: Redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes ${REDIS_PASS:+--requirepass ${REDIS_PASS}}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - pae-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: VisionPAE
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER:-pae}:${DB_PASS:-pae_prod_pass}@db:5432/${POSTGRES_DB:-pae_prod}
+      - REDIS_URL=redis://${REDIS_PASS:+:${REDIS_PASS}@}redis:6379
+      - JWT_SECRET=${JWT_SECRET:-change-in-production}
+      - DB_HOST=db
+      - DB_USER=${DB_USER:-pae}
+      - DB_NAME=${POSTGRES_DB:-pae_prod}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - pae-net
+
+volumes:
+  pgdata:
+  redis_data:
+
+networks:
+  pae-net:
+    driver: bridge
