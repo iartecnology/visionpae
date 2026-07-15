@@ -15,7 +15,7 @@ echo ">>> Iniciando API (puerto 3001)..."
 node /app/apps/api/dist/main.js &
 
 echo ">>> Iniciando Web (puerto 3000)..."
-node /app/apps/web/server.js &
+cd /app/apps/web && npx next start &
 
 echo ">>> Iniciando Worker..."
 node /app/apps/worker/dist/main.js &
