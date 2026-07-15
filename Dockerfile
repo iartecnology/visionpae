@@ -11,6 +11,7 @@ RUN pnpm install --frozen-lockfile
 
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:9080}
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN cd packages/engine && pnpm build && cd /app && \
     cd packages/shared && pnpm build && cd /app && \
@@ -20,7 +21,6 @@ RUN cd packages/engine && pnpm build && cd /app && \
     pnpm --filter mobile-sync build
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 
 EXPOSE 8080 3001
 
