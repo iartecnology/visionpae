@@ -176,10 +176,9 @@ export class RuplService {
     categorias?: string[];
     codigoMunicipio?: string;
     codigoDepartamento?: string;
-    tenantId: string;
     limit?: number;
   }) {
-    const where: any = { tenantId: filtros.tenantId, latitud: { not: null }, longitud: { not: null } };
+    const where: any = { latitud: { not: null }, longitud: { not: null }, estado: 'activo' };
 
     if (filtros.q) {
       where.OR = [
