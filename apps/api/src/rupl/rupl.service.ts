@@ -171,6 +171,55 @@ export class RuplService {
     });
   }
 
+  async mapa(filtros: {
+    q?: string;
+    categorias?: string[];
+    codigoMunicipio?: string;
+    codigoDepartamento?: string;
+    tenantId: string;
+    limit?: number;
+  }) {
+    const where: any = { tenantId: filtros.tenantId, latitud: { not: null }, longitud: { not: null } };
+
+    if (filtros.q) {
+      where.OR = [
+        { razonSocial: { contains: filtros.q, mode: 'insensitive' } },
+        { nombreComercial: { contains: filtros.q, mode: 'insensitive' } },
+      ];
+    }
+
+    if (filtros.codigoDepartamento) where.codigoDepartamento = filtros.codigoDepartamento;
+    if (filtros.codigoMunicipio) where.codigoMunicipio = filtros.codigoMunicipio;
+
+    if (filtros.categorias?.length) {
+      where.productos = {
+        some: { categoria: { in: filtros.categorias }, activo: true },
+      };
+    }
+
+    return this.prisma.productor.findMany({
+      where,
+      select: {
+        id: true,
+        razonSocial: true,
+        nombreComercial: true,
+        latitud: true,
+        longitud: true,
+        calificacionPromedio: true,
+        estado: true,
+        codigoMunicipio: true,
+        codigoDepartamento: true,
+        productos: {
+          where: { activo: true },
+          select: { id: true, nombre: true, categoria: true },
+          take: 5,
+        },
+      },
+      take: filtros.limit ?? 200,
+      orderBy: { razonSocial: 'asc' },
+    });
+  }
+
   // ---- Calificación ----
 
   async actualizarCalificacion(productorId: string, calificacion: number, tenantId: string) {

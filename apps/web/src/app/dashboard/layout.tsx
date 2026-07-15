@@ -10,6 +10,7 @@ import { OfflineIndicator } from '@/components/offline-indicator';
 
 const mainNav = [
   { label: 'Dashboard', href: '/dashboard', icon: '📊' },
+  { label: 'Explorar', href: '/dashboard/explorar', icon: '🗺️' },
   { label: 'Catálogo', href: '/dashboard/catalogo', icon: '🛒' },
   { label: 'RUPL', href: '/dashboard/rupl', icon: '👥' },
   { label: 'Compras', href: '/dashboard/compras', icon: '📝' },

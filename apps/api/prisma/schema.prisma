@@ -211,6 +211,8 @@ model Productor {
   codigoMunicipio    String           @map("codigo_municipio") @db.VarChar(5)
   codigoDepartamento String           @map("codigo_departamento") @db.VarChar(2)
   ubicacion          String?
+  latitud            Decimal?          @map("latitud") @db.Decimal(10, 7)
+  longitud           Decimal?          @map("longitud") @db.Decimal(10, 7)
   estrato            EstratoProductor @default(campesino)
   esComunidadEtnica  Boolean          @default(false) @map("es_comunidad_etnica")
   etnia              String?          @db.VarChar(100)

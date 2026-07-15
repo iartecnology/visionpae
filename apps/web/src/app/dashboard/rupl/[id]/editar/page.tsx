@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+
+const MapPicker = dynamic(() => import('@/components/mapa/map-picker'), { ssr: false });
 
 const tipoPersonaOpts = [
   { value: 'natural', label: 'Persona Natural' },
@@ -39,6 +42,8 @@ interface Productor {
   esComunidadEtnica: boolean;
   etnia?: string;
   estado: string;
+  latitud?: number | null;
+  longitud?: number | null;
 }
 
 export default function EditarProductorPage() {
@@ -84,6 +89,8 @@ export default function EditarProductorPage() {
         esComunidadEtnica: form.esComunidadEtnica,
         etnia: form.etnia,
         estado: form.estado,
+        latitud: form.latitud,
+        longitud: form.longitud,
       });
       setSuccess(true);
       setTimeout(() => router.push(`/dashboard/rupl/${params.id}`), 1000);
@@ -199,6 +206,22 @@ export default function EditarProductorPage() {
               />
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-slate-200/60 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
+        <CardHeader className="border-b border-slate-100 pb-3">
+          <CardTitle className="text-sm font-semibold text-slate-700">Ubicación</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <MapPicker
+            lat={form.latitud}
+            lng={form.longitud}
+            onChange={(lat, lng) => {
+              handleChange('latitud', lat);
+              handleChange('longitud', lng);
+            }}
+          />
         </CardContent>
       </Card>
 

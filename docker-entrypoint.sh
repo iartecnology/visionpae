@@ -23,8 +23,12 @@ node /app/apps/worker/dist/main.js &
 echo ">>> Iniciando Mobile Sync..."
 node /app/apps/mobile-sync/dist/main.js &
 
+sleep 2
+echo ">>> Iniciando Proxy (puerto 8080 → Web:3000 / API:3001)..."
+node /usr/local/bin/proxy.js &
+
 echo "=== Todos los servicios iniciados ==="
-echo "API: 3001 | Web: 3000 | Worker | MobileSync"
+echo "Proxy: 8080 | API: 3001 | Web: 3000 | Worker | MobileSync"
 
 # Mantener el contenedor vivo
 wait

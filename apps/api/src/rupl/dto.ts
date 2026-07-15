@@ -51,6 +51,16 @@ export class CrearProductorDto {
   @IsOptional()
   @IsString()
   etnia?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  latitud?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  longitud?: number;
 }
 
 export class ActualizarProductorDto {
@@ -93,6 +103,16 @@ export class ActualizarProductorDto {
   @IsOptional()
   @IsString()
   etnia?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  latitud?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  longitud?: number;
 }
 
 export class BuscarProductorDto {
@@ -205,4 +225,29 @@ export class ActualizarDocumentoDto {
   @IsOptional()
   @IsString()
   fechaVencimiento?: string;
+}
+
+export class BuscarMapaDto {
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @IsOptional()
+  @IsString({ each: true })
+  categorias?: string[];
+
+  @IsOptional()
+  @IsString()
+  codigoMunicipio?: string;
+
+  @IsOptional()
+  @IsString()
+  codigoDepartamento?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  limit?: number = 200;
 }

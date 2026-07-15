@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import dynamic from 'next/dynamic';
+
+const MapPicker = dynamic(() => import('@/components/mapa/map-picker'), { ssr: false });
 
 const tipoDocOptions = ['CC', 'NIT', 'CE', 'Pasaporte', 'otro'];
 const tipoPersonaOptions = [
@@ -35,6 +38,8 @@ export default function NuevoProductorPage() {
     estrato: '',
     esComunidadEtnica: false,
     etnia: '',
+    latitud: undefined as number | undefined,
+    longitud: undefined as number | undefined,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -148,6 +153,18 @@ export default function NuevoProductorPage() {
             <input value={form.etnia} onChange={(e) => set('etnia', e.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
           </div>
         )}
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-slate-700">Ubicación en el mapa</label>
+          <MapPicker
+            lat={form.latitud}
+            lng={form.longitud}
+            onChange={(lat, lng) => {
+              set('latitud', lat);
+              set('longitud', lng);
+            }}
+          />
+        </div>
 
         <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-4">
           <button type="button" onClick={() => router.back()} className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>

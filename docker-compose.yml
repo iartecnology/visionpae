@@ -35,10 +35,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://visionpae-web-tlpkch-5d2a3f-144-91-80-164.sslip.io:9080
     container_name: VisionPAE
     restart: unless-stopped
     ports:
-      - "9080:3000"
+      - "9080:8080"
       - "9091:3001"
     environment:
       - NODE_ENV=production
