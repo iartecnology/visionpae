@@ -8,6 +8,9 @@ import { formatDate, formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/badge';
 import { Button } from '@/components/ui/button';
 import { StarRating } from '@/components/star-rating';
+import dynamic from 'next/dynamic';
+
+const MapPicker = dynamic(() => import('@/components/mapa/map-picker'), { ssr: false });
 
 interface Productor {
   id: string;
@@ -22,6 +25,8 @@ interface Productor {
   codigoVereda?: string;
   codigoMunicipio: string;
   codigoDepartamento: string;
+  latitud?: number;
+  longitud?: number;
   estrato?: string;
   esComunidadEtnica: boolean;
   etnia?: string;
@@ -130,6 +135,16 @@ export default function DetalleProductorPage() {
           <div><dt className="text-slate-400">Actualizado</dt><dd className="font-medium text-slate-800">{formatDate(productor.updatedAt)}</dd></div>
         </dl>
       </div>
+
+      {productor.latitud && productor.longitud && (
+        <div className="mb-6 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
+          <div className="p-6 pb-3">
+            <h2 className="text-sm font-semibold text-slate-700">Ubicación</h2>
+            <p className="mt-1 text-xs text-slate-400">{Number(productor.latitud).toFixed(5)}, {Number(productor.longitud).toFixed(5)}</p>
+          </div>
+          <MapPicker lat={productor.latitud} lng={productor.longitud} readOnly />
+        </div>
+      )}
 
       <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
         <div className="mb-4 flex items-center justify-between">

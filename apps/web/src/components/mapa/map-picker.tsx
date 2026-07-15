@@ -32,10 +32,12 @@ export default function MapPicker({
   lat,
   lng,
   onChange,
+  readOnly,
 }: {
   lat?: number | null;
   lng?: number | null;
-  onChange: (lat: number, lng: number) => void;
+  onChange?: (lat: number, lng: number) => void;
+  readOnly?: boolean;
 }) {
   const center: [number, number] =
     lat && lng ? [lat, lng] : [5.5, -73.5];
@@ -52,21 +54,25 @@ export default function MapPicker({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <ClickHandler
-          onClick={(lat, lng) => onChange(lat, lng)}
-        />
+        {!readOnly && (
+          <ClickHandler
+            onClick={(lat, lng) => onChange?.(lat, lng)}
+          />
+        )}
         {lat && lng && (
           <Marker position={[lat, lng]} icon={icon} />
         )}
       </MapContainer>
-      <div className="flex items-center gap-3 border-t border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500">
-        <span>Haz clic en el mapa para ubicar al productor</span>
-        {lat && lng && (
-          <span className="ml-auto font-mono">
-            {Number(lat).toFixed(5)}, {Number(lng).toFixed(5)}
-          </span>
-        )}
-      </div>
+      {!readOnly && (
+        <div className="flex items-center gap-3 border-t border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+          <span>Haz clic en el mapa para ubicar al productor</span>
+          {lat && lng && (
+            <span className="ml-auto font-mono">
+              {Number(lat).toFixed(5)}, {Number(lng).toFixed(5)}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

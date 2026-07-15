@@ -13,12 +13,9 @@ ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:9080}
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN cd packages/engine && pnpm build && cd /app && \
-    cd packages/shared && pnpm build && cd /app && \
-    cd apps/api && pnpm db:generate && pnpm build && cd /app && \
-    pnpm --filter web build && \
-    pnpm --filter worker build && \
-    pnpm --filter mobile-sync build
+RUN pnpm --filter=engine build && pnpm --filter=shared build && \
+    cd apps/api && pnpm db:generate && \
+    pnpm run --filter=api --filter=web --filter=worker --filter=mobile-sync --parallel build
 
 ENV NODE_ENV=production
 
