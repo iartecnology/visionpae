@@ -12,7 +12,7 @@ const mainNav = [
   { label: 'Dashboard', href: '/dashboard', icon: '📊' },
   { label: 'Explorar', href: '/dashboard/explorar', icon: '🗺️' },
   { label: 'Catálogo', href: '/dashboard/catalogo', icon: '🛒' },
-  { label: 'RUPL', href: '/dashboard/rupl', icon: '👥' },
+  { label: 'RUPL Productores Locales', href: '/dashboard/rupl', icon: '👥' },
   { label: 'Compras', href: '/dashboard/compras', icon: '📝' },
   { label: 'Certificaciones', href: '/dashboard/certificaciones', icon: '📋' },
   { label: 'Minutas', href: '/dashboard/minutas', icon: '🍽️' },
