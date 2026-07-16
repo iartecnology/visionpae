@@ -13,7 +13,7 @@ module.exports = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#0B6E4F',
+          DEFAULT: 'rgb(var(--tenant-primary-rgb, 11, 110, 79))',
           foreground: '#FFFFFF',
         },
         secondary: {

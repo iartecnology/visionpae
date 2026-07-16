@@ -21,7 +21,7 @@ export class FeatureFlagsController {
 
   @Patch(':flag')
   @UseGuards(RolesGuard)
-  @Roles('super_admin')
+  @Roles('super_admin', 'admin_entidad')
   async toggle(@Param('flag') flag: string, @Body() body: { habilitado: boolean }, @Req() req: any) {
     return this.prisma.featureFlag.upsert({
       where: { tenantId_flag: { tenantId: req.user.tenantId, flag } },

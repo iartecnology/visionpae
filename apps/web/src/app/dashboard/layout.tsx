@@ -2,34 +2,54 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { NotificationBell } from '@/components/notification-bell';
 import { SWRegister } from '@/components/sw-register';
 import { OfflineIndicator } from '@/components/offline-indicator';
+import { menuDefs, adminMenuItems, MenuItem } from '@/lib/menus';
+import { useApiGet } from '@/lib/swr-api';
 
-const mainNav = [
-  { label: 'Dashboard', href: '/dashboard', icon: '📊' },
-  { label: 'Explorar', href: '/dashboard/explorar', icon: '🗺️' },
-  { label: 'Catálogo', href: '/dashboard/catalogo', icon: '🛒' },
-  { label: 'RUPL Productores Locales', href: '/dashboard/rupl', icon: '👥' },
-  { label: 'Compras', href: '/dashboard/compras', icon: '📝' },
-  { label: 'Certificaciones', href: '/dashboard/certificaciones', icon: '📋' },
-  { label: 'Minutas', href: '/dashboard/minutas', icon: '🍽️' },
-  { label: 'Ruedas', href: '/dashboard/ruedas', icon: '🤝' },
-  { label: 'Incidencias', href: '/dashboard/incidencias', icon: '⚠️' },
-  { label: 'Actas Recibo', href: '/dashboard/actas-recibo', icon: '📄' },
-  { label: 'Notificaciones', href: '/dashboard/notificaciones', icon: '🔔' },
-  { label: 'Reportes', href: '/dashboard/reportes', icon: '📈' },
-  { label: 'Configuración', href: '/dashboard/configuracion', icon: '⚙️' },
-];
+function adjustColor(hex: string, amount: number): string {
+  hex = hex.replace('#', '');
+  const num = parseInt(hex, 16);
+  let r = (num >> 16) + amount;
+  let g = ((num >> 8) & 0xff) + amount;
+  let b = (num & 0xff) + amount;
+  r = Math.max(0, Math.min(255, r));
+  g = Math.max(0, Math.min(255, g));
+  b = Math.max(0, Math.min(255, b));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
 
-const adminNav = [
-  { label: 'Entidades', href: '/dashboard/admin/tenants', icon: '🏛️' },
-  { label: 'Usuarios', href: '/dashboard/admin/usuarios', icon: '👤' },
-  { label: 'Feature Flags', href: '/dashboard/admin/feature-flags', icon: '🚩' },
-  { label: 'Sincronización', href: '/dashboard/admin/sincronizacion', icon: '🔄' },
-];
+function hexToRgb(hex: string): string {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return `${r}, ${g}, ${b}`;
+}
+
+function SidebarLink({ item, pathname, onNavigate }: { item: MenuItem; pathname: string; onNavigate: () => void }) {
+  if (!item.href) return null;
+  const isActive = pathname.startsWith(item.href);
+  return (
+    <Link
+      key={item.href}
+      href={item.href}
+      onClick={onNavigate}
+      className={cn(
+        'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
+        isActive
+          ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]'
+          : 'text-emerald-200/70 hover:bg-white/10 hover:text-white'
+      )}
+    >
+      <item.icon className="h-4 w-4 shrink-0" />
+      {item.label}
+    </Link>
+  );
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -38,7 +58,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userEmail, setUserEmail] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [tenantName, setTenantName] = useState('');
+
+  const { data: meData } = useApiGet<{
+    user: { id: string; email: string; nombreCompleto: string; role: { id: string; codigo: string; nombre: string } | null };
+    permissions: string[];
+    tenant: { id: string; nombre: string; slug: string; logoUrl: string | null; config: Record<string, unknown> };
+  } | null>('/auth/me');
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -53,6 +81,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   useEffect(() => {
+    if (meData?.tenant?.nombre) {
+      setTenantName(meData.tenant.nombre);
+      const { config } = meData.tenant;
+      const primaryColor = (config?.primaryColor as string) || '#065f46';
+      const root = document.documentElement;
+      root.style.setProperty('--tenant-primary', primaryColor);
+      root.style.setProperty('--tenant-primary-hover', adjustColor(primaryColor, -20));
+      root.style.setProperty('--tenant-primary-light', adjustColor(primaryColor, 50));
+      root.style.setProperty('--tenant-primary-bg', adjustColor(primaryColor, 90));
+      root.style.setProperty('--tenant-primary-rgb', hexToRgb(primaryColor));
+      root.style.setProperty('--tenant-primary-foreground', '#ffffff');
+    }
+  }, [meData]);
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
@@ -62,19 +105,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const permissions = meData?.permissions ?? [];
+
+  const visibleMenu = useMemo(() => {
+    const hasPerm = (recurso?: string) => {
+      if (!recurso) return true;
+      return permissions.includes(`${recurso}:consultar`);
+    };
+    return menuDefs.filter((item) => hasPerm(item.recurso));
+  }, [permissions]);
+
+  const visibleAdminMenu = useMemo(() => {
+    const hasPerm = (recurso?: string) => {
+      if (!recurso) return false;
+      return permissions.includes(`${recurso}:consultar`);
+    };
+    return adminMenuItems.filter((item) => hasPerm(item.recurso));
+  }, [permissions]);
+
+  const navItems = userRole === 'super_admin'
+    ? [...visibleMenu, ...visibleAdminMenu]
+    : visibleMenu;
+
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     router.push('/login');
   };
 
-  const navItems = userRole === 'super_admin' ? [...mainNav, ...adminNav] : mainNav;
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"
@@ -82,18 +142,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       )}
 
-      {/* ===== SIDEBAR ===== */}
       <aside className={cn(
-        'fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-950 shadow-[4px_0_24px_-8px_rgba(0,0,0,0.3)] transition-transform duration-300 lg:static lg:z-auto lg:w-56',
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      )}>
-        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-emerald-700/50 px-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30">
+        'fixed inset-y-0 left-0 z-40 flex w-64 flex-col shadow-[4px_0_24px_-8px_rgba(0,0,0,0.3)] transition-transform duration-300 lg:static lg:z-auto lg:w-56',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+      )}
+        style={{ background: `linear-gradient(to bottom, var(--tenant-primary, #065f46), ${adjustColor('#065f46', -20)}, ${adjustColor('#065f46', -40)})` }}
+      >
+        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-white/20 px-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg shadow-lg"
+            style={{ background: 'linear-gradient(to bottom right, rgba(255,255,255,0.3), rgba(255,255,255,0.1))' }}
+          >
             <span className="text-sm font-bold text-white">V</span>
           </div>
           <span className="text-lg font-bold text-white">VisionPAE</span>
-          <span className="ml-auto rounded bg-emerald-700/50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-200">PAE</span>
-          <button onClick={() => setSidebarOpen(false)} className="ml-1 text-emerald-300 lg:hidden">
+          <span className="ml-auto rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-medium text-white/80">PAE</span>
+          <button onClick={() => setSidebarOpen(false)} className="ml-1 text-white/60 lg:hidden">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -101,38 +164,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
           {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setSidebarOpen(false)}
-              className={cn(
-                'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
-                pathname.startsWith(item.href)
-                  ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]'
-                  : 'text-emerald-200/70 hover:bg-white/10 hover:text-white'
-              )}
-            >
-              <span className="text-base">{item.icon}</span>
-              {item.label}
-            </Link>
+            <SidebarLink key={item.href || item.label} item={item} pathname={pathname} onNavigate={() => setSidebarOpen(false)} />
           ))}
         </nav>
-        <div className="border-t border-emerald-700/30 p-3">
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-900/50 px-3 py-2">
-            <div className="h-7 w-7 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-inner" />
+        <div className="border-t border-white/20 p-3">
+          <div className="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2">
+            <div className="h-7 w-7 shrink-0 rounded-full bg-white/30 shadow-inner" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-emerald-100">
+              <p className="truncate text-xs font-medium text-white">
                 {userRole === 'super_admin' ? 'Super Admin' : userRole?.replace(/_/g, ' ') || 'Usuario'}
               </p>
-              <p className="truncate text-[10px] text-emerald-300/70">Municipio de Tunja</p>
+              <p className="truncate text-[10px] text-white/60">{tenantName || 'Cargando...'}</p>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* ===== MAIN ===== */}
       <div className="relative z-10 flex flex-1 flex-col">
-        {/* Header */}
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] lg:px-6">
           <div className="flex items-center gap-3">
             <button onClick={() => setSidebarOpen(true)} className="text-slate-500 lg:hidden">
@@ -140,19 +188,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="hidden h-7 w-1 rounded-full bg-gradient-to-b from-emerald-500 to-emerald-700 sm:flex" />
-            <h2 className="text-sm font-semibold text-slate-700">🏛️ PAE · Boyacá</h2>
+            <span className="hidden h-7 w-1 rounded-full sm:flex" style={{ background: 'linear-gradient(to bottom, var(--tenant-primary, #059669), var(--tenant-primary-hover, #065f46))' }} />
+            <h2 className="text-sm font-semibold text-slate-700">PAE · {tenantName ? tenantName.split(' ').slice(0, 2).join(' ') : 'Boyacá'}</h2>
           </div>
           <div className="relative flex items-center gap-2 sm:gap-4" ref={dropdownRef}>
             <NotificationBell />
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200/50">
+            <span className="rounded-full px-3 py-1 text-xs font-medium ring-1"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--tenant-primary, #065f46) 10%, transparent)',
+                color: 'var(--tenant-primary, #065f46)',
+                borderColor: 'color-mix(in srgb, var(--tenant-primary, #065f46) 30%, transparent)',
+              }}
+            >
               {userRole === 'super_admin' ? 'Super Admin' : userRole?.replace(/_/g, ' ') || 'Usuario'}
             </span>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-slate-100"
             >
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-md ring-2 ring-white" />
+              <div className="h-8 w-8 rounded-full shadow-md ring-2 ring-white"
+                style={{ background: 'linear-gradient(to bottom right, var(--tenant-primary-light, #34d399), var(--tenant-primary, #065f46))' }}
+              />
               <svg className={`h-4 w-4 text-slate-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
@@ -190,7 +246,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        {/* Content */}
         <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-emerald-50/20">
           <div className="mx-auto max-w-7xl p-3 sm:p-6">
             {children}
