@@ -120,7 +120,7 @@ export default function ReportesPage() {
         </ChartCard>
       )}
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {categorias.length > 0 && (
           <ChartCard title="Productos por Categoría">
             <ResponsiveContainer width="100%" height={280}>
@@ -166,7 +166,7 @@ export default function ReportesPage() {
       )}
 
       {productores && (
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <ChartCard title="Por Estado">
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>

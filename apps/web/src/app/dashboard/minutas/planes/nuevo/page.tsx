@@ -49,7 +49,7 @@ export default function NuevoPlanPage() {
               <label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label>
               <Input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Plan Semana 1 - Julio" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">Fecha Inicio</label>
                 <Input type="date" value={form.fechaInicio} onChange={(e) => setForm({ ...form, fechaInicio: e.target.value })} />

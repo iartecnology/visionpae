@@ -82,7 +82,7 @@ export default function NuevaRecetaPage() {
               <label className="mb-1 block text-xs font-medium text-slate-600">Nombre de la Receta</label>
               <Input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Arroz con Pollo" />
             </div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">Tipo Comida</label>
                 <Select options={[{ value: 'desayuno', label: 'Desayuno' }, { value: 'almuerzo', label: 'Almuerzo' }, { value: 'cena', label: 'Cena' }, { value: 'refrigerio', label: 'Refrigerio' }]} value={form.categoriaComida} onChange={(e) => setForm({ ...form, categoriaComida: e.target.value })} />

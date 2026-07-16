@@ -52,7 +52,7 @@ export default function OrdenDetailPage() {
 
       <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
         <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
-        <dl className="grid grid-cols-2 gap-4 text-sm">
+        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><dt className="text-slate-400">Productor</dt><dd className="font-medium text-slate-800">{orden.productor.razonSocial}</dd></div>
           <div><dt className="text-slate-400">Documento</dt><dd className="font-medium text-slate-800">{orden.productor.numeroDocumento}</dd></div>
           <div><dt className="text-slate-400">Municipio</dt><dd className="font-medium text-slate-800">{orden.productor.codigoMunicipio}</dd></div>

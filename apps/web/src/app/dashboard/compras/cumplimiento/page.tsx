@@ -90,7 +90,7 @@ export default function CumplimientoPage() {
 
       {data && (
         <>
-          <div className="mb-6 grid grid-cols-4 gap-4">
+          <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <MetricCard label="% Cumplimiento" value={`${data.cumplimiento.porcentaje}%`} color={data.cumplimiento.porcentaje >= data.cumplimiento.meta ? 'emerald' : 'red'} />
             <MetricCard label="Meta" value={`${data.cumplimiento.meta}%`} color="slate" />
             <MetricCard label="Gasto Local" value={formatCurrency(data.cumplimiento.gastoLocal)} color="blue" />
@@ -116,7 +116,7 @@ export default function CumplimientoPage() {
 
           <div className="rounded-lg border border-slate-200 bg-white p-4">
             <h2 className="mb-4 text-sm font-semibold text-slate-700">Simulador de Escenarios</h2>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="mb-1 block text-xs text-slate-500">Productor ID</label>
                 <input
@@ -155,7 +155,7 @@ export default function CumplimientoPage() {
             </div>
 
             {simResult && (
-              <div className="mt-4 grid grid-cols-3 gap-4 rounded-lg bg-slate-50 p-4">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-lg bg-slate-50 p-4">
                 <div>
                   <p className="text-xs text-slate-400">Cumplimiento Actual</p>
                   <p className={`text-lg font-bold ${simResult.actual.porcentaje >= 30 ? 'text-emerald-600' : 'text-red-600'}`}>

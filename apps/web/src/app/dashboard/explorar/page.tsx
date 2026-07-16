@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import type { ProductorMapa } from '@/components/mapa/explorar-map';
 import Link from 'next/link';
 import { StarRating } from '@/components/star-rating';
+import { cn } from '@/lib/utils';
 
 const ExplorarMap = dynamic(() => import('@/components/mapa/explorar-map'), {
   ssr: false,
@@ -65,10 +66,33 @@ export default function ExplorarPage() {
     return [5.5, -73.5]; // Boyacá center
   }, [productores, selected]);
 
+  const [showMobileList, setShowMobileList] = useState(true);
+
   return (
-    <div className="flex h-[calc(100vh-7rem)] gap-4">
+    <div className="flex h-[calc(100vh-7rem)] flex-col gap-4 lg:flex-row">
+      {/* Mobile toggle */}
+      <div className="flex gap-2 lg:hidden">
+        <button
+          onClick={() => setShowMobileList(true)}
+          className={cn('flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors', showMobileList ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600')}
+        >
+          Lista
+        </button>
+        <button
+          onClick={() => setShowMobileList(false)}
+          className={cn('flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors', !showMobileList ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600')}
+        >
+          Mapa
+        </button>
+      </div>
+
       {/* Sidebar */}
-      <div className="flex w-80 shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className={cn(
+        'flex shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm',
+        'w-full lg:w-80',
+        'lg:flex', // always visible on desktop
+        showMobileList ? 'flex' : 'hidden lg:flex' // toggle on mobile
+      )}>
         {/* Search & filters */}
         <div className="border-b border-slate-100 p-3">
           <input
@@ -156,7 +180,10 @@ export default function ExplorarPage() {
       </div>
 
       {/* Map */}
-      <div className="flex-1 overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+      <div className={cn(
+        'flex-1 overflow-hidden rounded-xl border border-slate-200 shadow-sm',
+        showMobileList ? 'hidden lg:flex' : 'flex'
+      )}>
         <ExplorarMap
           productores={productores}
           center={mapCenter}

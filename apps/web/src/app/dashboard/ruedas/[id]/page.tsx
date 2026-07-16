@@ -52,7 +52,7 @@ export default function RuedaDetailPage() {
         <Card className="border-slate-200/60 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
           <CardHeader className="border-b border-slate-100 pb-3"><CardTitle className="text-sm font-semibold text-slate-700">Detalles</CardTitle></CardHeader>
           <CardContent className="space-y-3 pt-4 text-sm">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div><dt className="text-slate-400">Fecha</dt><dd className="font-medium text-slate-800">{formatDate(rueda.fecha)}</dd></div>
               <div><dt className="text-slate-400">Lugar</dt><dd className="font-medium text-slate-800">{rueda.lugar}</dd></div>
               <div><dt className="text-slate-400">Tipo</dt><dd className="font-medium text-slate-800 capitalize">{rueda.tipo}</dd></div>

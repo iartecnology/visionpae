@@ -81,7 +81,7 @@ export default function NuevoContratoPage() {
             <CardTitle className="text-sm font-semibold text-slate-700">Información del Contrato</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">N° Contrato</label>
                 <Input value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} placeholder="Ej: CT-2026-001" />
@@ -125,7 +125,7 @@ export default function NuevoContratoPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">Período Inicio</label>
                 <Input type="date" value={form.periodoInicio} onChange={(e) => setForm({ ...form, periodoInicio: e.target.value })} />
@@ -136,7 +136,7 @@ export default function NuevoContratoPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">Valor Total ($)</label>
                 <Input type="number" min="0" step="100000" value={form.valorTotal} onChange={(e) => setForm({ ...form, valorTotal: e.target.value })} />

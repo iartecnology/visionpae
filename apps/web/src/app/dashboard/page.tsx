@@ -44,7 +44,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-emerald-200/60 bg-gradient-to-br from-emerald-50 to-white shadow-[0_4px_16px_-8px_rgba(5,150,105,0.12)]">
           <CardHeader className="p-4 pb-0">
             <CardTitle className="text-xs font-medium text-emerald-700">% Cumplimiento Local</CardTitle>
@@ -84,7 +84,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card className="border-slate-200/60 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
           <CardHeader className="border-b border-slate-100 pb-3">
             <CardTitle className="text-sm font-semibold text-slate-700">Evolución % Cumplimiento</CardTitle>

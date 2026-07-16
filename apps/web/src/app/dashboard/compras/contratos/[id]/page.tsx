@@ -71,7 +71,7 @@ export default function ContratoDetailPage() {
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
           <p className="text-xs text-slate-400">Valor Total</p>
           <p className="mt-1 text-xl font-bold text-slate-800">{formatCurrency(contrato.valorTotal)}</p>
@@ -89,7 +89,7 @@ export default function ContratoDetailPage() {
 
       <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
         <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
-        <dl className="grid grid-cols-2 gap-4 text-sm">
+        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><dt className="text-slate-400">Objeto</dt><dd className="font-medium text-slate-800 col-span-2">{contrato.objeto}</dd></div>
           <div><dt className="text-slate-400">Período</dt><dd className="font-medium text-slate-800">{formatDate(contrato.periodoInicio)} — {formatDate(contrato.periodoFin)}</dd></div>
           <div><dt className="text-slate-400">Creado</dt><dd className="font-medium text-slate-800">{formatDate(contrato.createdAt)}</dd></div>

@@ -101,7 +101,7 @@ export default function NuevoDocumentoPage() {
               {file && <p className="mt-1 text-xs text-slate-400">{file.name} ({(file.size / 1024).toFixed(1)} KB)</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">Fecha Expedición</label>
                 <Input type="date" value={fechaExpedicion} onChange={(e) => setFechaExpedicion(e.target.value)} />

@@ -72,7 +72,7 @@ export default function NuevaIncidenciaPage() {
           <textarea value={form.descripcion} onChange={(e) => set('descripcion', e.target.value)} required rows={4} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Latitud</label>
             <input type="number" step="any" value={form.latitud} onChange={(e) => set('latitud', e.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" />

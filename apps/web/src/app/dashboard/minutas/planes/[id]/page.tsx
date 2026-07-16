@@ -38,7 +38,7 @@ export default function PlanDetailPage() {
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
           <p className="text-xs text-slate-400">Período</p>
           <p className="mt-1 text-sm font-semibold text-slate-700">{formatDate(plan.fechaInicio)} — {formatDate(plan.fechaFin)}</p>

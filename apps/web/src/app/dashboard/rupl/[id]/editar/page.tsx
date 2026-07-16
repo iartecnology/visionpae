@@ -122,7 +122,7 @@ export default function EditarProductorPage() {
           <CardTitle className="text-sm font-semibold text-slate-700">Información General</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-600">Razón Social</label>
               <Input value={form.razonSocial} onChange={(e) => handleChange('razonSocial', e.target.value)} />
@@ -133,7 +133,7 @@ export default function EditarProductorPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-600">Tipo Persona</label>
               <Select
@@ -157,7 +157,7 @@ export default function EditarProductorPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-600">Teléfono</label>
               <Input value={form.telefonoContacto || ''} onChange={(e) => handleChange('telefonoContacto', e.target.value)} />
@@ -173,7 +173,7 @@ export default function EditarProductorPage() {
             <Input value={form.direccionPredio || ''} onChange={(e) => handleChange('direccionPredio', e.target.value)} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-600">Código Vereda</label>
               <Input value={form.codigoVereda || ''} onChange={(e) => handleChange('codigoVereda', e.target.value)} />

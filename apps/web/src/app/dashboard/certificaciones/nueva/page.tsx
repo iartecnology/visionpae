@@ -52,7 +52,7 @@ export default function NuevaCertificacionPage() {
           <input value={form.contratoId} onChange={(e) => set('contratoId', e.target.value)} required className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Categoría de Producto *</label>
             <select value={form.productoCategoria} onChange={(e) => set('productoCategoria', e.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500">
@@ -65,7 +65,7 @@ export default function NuevaCertificacionPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Periodo Inicio *</label>
             <input type="date" value={form.periodoInicio} onChange={(e) => set('periodoInicio', e.target.value)} required className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" />

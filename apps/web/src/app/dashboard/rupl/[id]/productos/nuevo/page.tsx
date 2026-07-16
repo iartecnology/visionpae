@@ -93,7 +93,7 @@ export default function NuevoProductoPage() {
               <Input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Tomate Chonto" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">Categoría</label>
                 <Select options={categoriaOpts} value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} />
@@ -104,7 +104,7 @@ export default function NuevoProductoPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">Volumen Disponible</label>
                 <Input type="number" step="0.01" min="0" value={form.volumenDisponible} onChange={(e) => setForm({ ...form, volumenDisponible: e.target.value })} placeholder="0" />

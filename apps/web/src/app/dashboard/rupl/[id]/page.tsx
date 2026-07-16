@@ -120,7 +120,7 @@ export default function DetalleProductorPage() {
 
       <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
         <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
-        <dl className="grid grid-cols-2 gap-4 text-sm">
+        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><dt className="text-slate-400">Razón Social</dt><dd className="font-medium text-slate-800">{productor.razonSocial}</dd></div>
           <div><dt className="text-slate-400">Nombre Comercial</dt><dd className="font-medium text-slate-800">{productor.nombreComercial || '—'}</dd></div>
           <div><dt className="text-slate-400">Tipo Persona</dt><dd className="font-medium text-slate-800">{tipoPersonaMap[productor.tipoPersona] || productor.tipoPersona}</dd></div>

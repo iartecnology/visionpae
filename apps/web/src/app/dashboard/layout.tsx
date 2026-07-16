@@ -70,22 +70,41 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = userRole === 'super_admin' ? [...mainNav, ...adminNav] : mainNav;
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-100">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ===== SIDEBAR ===== */}
-      <aside className="relative z-20 flex w-56 flex-col bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-950 shadow-[4px_0_24px_-8px_rgba(0,0,0,0.3)]">
+      <aside className={cn(
+        'fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-950 shadow-[4px_0_24px_-8px_rgba(0,0,0,0.3)] transition-transform duration-300 lg:static lg:z-auto lg:w-56',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      )}>
         <div className="flex h-14 shrink-0 items-center gap-2 border-b border-emerald-700/50 px-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/30">
             <span className="text-sm font-bold text-white">V</span>
           </div>
           <span className="text-lg font-bold text-white">VisionPAE</span>
           <span className="ml-auto rounded bg-emerald-700/50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-200">PAE</span>
+          <button onClick={() => setSidebarOpen(false)} className="ml-1 text-emerald-300 lg:hidden">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
         <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setSidebarOpen(false)}
               className={cn(
                 'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
                 pathname.startsWith(item.href)
@@ -114,12 +133,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ===== MAIN ===== */}
       <div className="relative z-10 flex flex-1 flex-col">
         {/* Header */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)]">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] lg:px-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-7 w-1 rounded-full bg-gradient-to-b from-emerald-500 to-emerald-700" />
+            <button onClick={() => setSidebarOpen(true)} className="text-slate-500 lg:hidden">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <span className="hidden h-7 w-1 rounded-full bg-gradient-to-b from-emerald-500 to-emerald-700 sm:flex" />
             <h2 className="text-sm font-semibold text-slate-700">🏛️ PAE · Boyacá</h2>
           </div>
-          <div className="relative flex items-center gap-4" ref={dropdownRef}>
+          <div className="relative flex items-center gap-2 sm:gap-4" ref={dropdownRef}>
             <NotificationBell />
             <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200/50">
               {userRole === 'super_admin' ? 'Super Admin' : userRole?.replace(/_/g, ' ') || 'Usuario'}
@@ -168,7 +192,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Content */}
         <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-emerald-50/20">
-          <div className="mx-auto max-w-7xl p-6">
+          <div className="mx-auto max-w-7xl p-3 sm:p-6">
             {children}
           </div>
         </main>

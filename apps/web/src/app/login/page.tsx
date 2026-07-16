@@ -57,7 +57,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 p-4">
-      <div className="flex w-full max-w-2xl gap-6">
+      <div className="flex w-full max-w-2xl flex-col gap-6 lg:flex-row">
         <Card className="flex-1 shadow-2xl shadow-emerald-950/50">
           <CardHeader className="text-center">
             <div className="mb-2 flex justify-center">
@@ -92,7 +92,7 @@ export default function LoginPage() {
           </CardFooter>
         </Card>
 
-        <div className="w-64 space-y-3">
+        <div className="w-full space-y-3 lg:w-64">
           <p className="text-xs font-medium uppercase tracking-wide text-emerald-100/70">Acceso rápido</p>
           {testUsers.map((u) => (
             <button

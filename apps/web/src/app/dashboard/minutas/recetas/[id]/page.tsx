@@ -39,7 +39,7 @@ export default function RecetaDetailPage() {
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-4 gap-3">
+      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="rounded-xl border border-slate-200/80 bg-white p-4 text-center shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
           <p className="text-xs text-slate-400">Tipo</p>
           <p className="mt-1 text-sm font-semibold text-slate-700">{comidaLabel[receta.categoriaComida] || receta.categoriaComida}</p>

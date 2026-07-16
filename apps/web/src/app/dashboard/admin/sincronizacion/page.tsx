@@ -67,7 +67,7 @@ export default function AdminSincronizacionPage() {
                 )}
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-4 text-xs text-slate-500">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-500">
                 <div>
                   <span className="text-slate-400">Último sync pull:</span>
                   <br />
