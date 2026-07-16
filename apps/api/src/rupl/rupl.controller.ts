@@ -7,7 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { RuplService } from './rupl.service';
-import { CrearProductorDto, ActualizarProductorDto, BuscarProductorDto, CrearProductoOfrecidoDto, CrearDocumentoDto, ActualizarDocumentoDto } from './dto';
+import { CrearProductorDto, ActualizarProductorDto, BuscarProductorDto, CrearProductoOfrecidoDto, CrearDocumentoDto, ActualizarDocumentoDto, BuscarProductoDto } from './dto';
 
 @Controller('rupl/productores')
 export class RuplController {
@@ -61,8 +61,13 @@ export class RuplController {
 
   @Get(':id/productos')
   @UseGuards(AuthGuard('jwt'))
-  async listarProductos(@Param('id') id: string, @Req() req: any) {
-    return this.rupl.listarProductos(id, req.user.tenantId);
+  async listarProductos(
+    @Param('id') id: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Req() req?: any,
+  ) {
+    return this.rupl.listarProductos(id, req.user.tenantId, page, limit);
   }
 
   @Patch(':id/productos/:prodId')
@@ -166,16 +171,9 @@ export class RuplController {
 
   @Get('/productos/buscar')
   @UseGuards(AuthGuard('jwt'))
-  async buscarProductos(
-    @Query('q') q?: string,
-    @Query('categoria') categoria?: string,
-    @Query('codigoMunicipio') codigoMunicipio?: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Req() req?: any,
-  ) {
+  async buscarProductos(@Query() filtros: BuscarProductoDto, @Req() req: any) {
     return this.rupl.buscarProductos({
-      q, categoria, codigoMunicipio, page, limit,
+      ...filtros,
       tenantId: req.user.tenantId,
     });
   }

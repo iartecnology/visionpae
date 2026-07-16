@@ -103,11 +103,18 @@ export class RuplService {
     });
   }
 
-  async listarProductos(productorId: string, tenantId: string) {
-    return this.prisma.productoOfrecido.findMany({
-      where: { productorId, tenantId, activo: true },
-      orderBy: { createdAt: 'desc' },
-    });
+  async listarProductos(productorId: string, tenantId: string, page = 1, limit = 50) {
+    const where = { productorId, tenantId, activo: true };
+    const [data, total] = await Promise.all([
+      this.prisma.productoOfrecido.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.productoOfrecido.count({ where }),
+    ]);
+    return { data, meta: { page, limit, total } };
   }
 
   // ---- Documentos ----

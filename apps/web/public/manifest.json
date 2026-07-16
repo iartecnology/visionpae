@@ -1,13 +1,24 @@
 {
-  "name": "VisionPAE",
+  "name": "VisionPAE — Gestión de Compras PAE",
   "short_name": "VisionPAE",
-  "description": "Sistema de Gestión PAE - Programa de Alimentación Escolar",
+  "description": "Sistema de Gestión de Compras PAE — Programa de Alimentación Escolar, Ley 2046",
   "start_url": "/dashboard",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#f8fafc",
   "theme_color": "#065f46",
+  "scope": "/",
+  "categories": ["business", "education", "government"],
+  "lang": "es-CO",
+  "prefer_related_applications": false,
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Explorar mapa", "short_name": "Mapa", "url": "/dashboard/explorar" },
+    { "name": "Catálogo de productos", "short_name": "Catálogo", "url": "/dashboard/catalogo" },
+    { "name": "Productores", "short_name": "RUPL", "url": "/dashboard/rupl" }
   ]
 }

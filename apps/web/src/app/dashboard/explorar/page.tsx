@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import { api } from '@/lib/api';
+import { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import type { ProductorMapa } from '@/components/mapa/explorar-map';
 import Link from 'next/link';
 import { StarRating } from '@/components/star-rating';
 import { cn } from '@/lib/utils';
+import { useApiGet } from '@/lib/swr-api';
 
 const ExplorarMap = dynamic(() => import('@/components/mapa/explorar-map'), {
   ssr: false,
@@ -23,30 +23,19 @@ const CATEGORIAS = [
 ];
 
 export default function ExplorarPage() {
-  const [productores, setProductores] = useState<ProductorMapa[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [selected, setSelected] = useState<ProductorMapa | null>(null);
 
-  const fetchMapa = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (search) params.set('q', search);
-      selectedCats.forEach((c) => params.append('categorias', c));
-      const data = await api.get<ProductorMapa[]>(`/rupl/mapa?${params}`);
-      setProductores(Array.isArray(data) ? data : []);
-    } catch {
-      setProductores([]);
-    } finally {
-      setLoading(false);
-    }
+  const params = useMemo(() => {
+    const p = new URLSearchParams();
+    if (search) p.set('q', search);
+    selectedCats.forEach((c) => p.append('categorias', c));
+    return p.toString();
   }, [search, selectedCats]);
 
-  useEffect(() => {
-    fetchMapa();
-  }, [fetchMapa]);
+  const { data, isLoading } = useApiGet<ProductorMapa[]>(`/rupl/mapa?${params}`);
+  const productores = Array.isArray(data) ? data : [];
 
   const toggleCat = (cat: string) => {
     setSelectedCats((prev) =>
@@ -63,7 +52,7 @@ export default function ExplorarPage() {
         productores.reduce((s, p) => s + Number(p.longitud), 0) / productores.length;
       return [avgLat, avgLng];
     }
-    return [5.5, -73.5]; // Boyacá center
+    return [5.5, -73.5];
   }, [productores, selected]);
 
   const [showMobileList, setShowMobileList] = useState(true);
@@ -121,7 +110,7 @@ export default function ExplorarPage() {
 
         {/* Results list */}
         <div className="flex-1 overflow-y-auto">
-          {loading ? (
+          {isLoading ? (
             <div className="p-6 text-center text-sm text-slate-400">Cargando…</div>
           ) : productores.length === 0 ? (
             <div className="p-6 text-center text-sm text-slate-400">
