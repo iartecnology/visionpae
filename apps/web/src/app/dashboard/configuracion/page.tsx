@@ -18,14 +18,36 @@ function adjustColor(hex: string, amount: number): string {
 
 const PRESET_COLORS = [
   { name: 'Esmeralda', hex: '#065f46' },
+  { name: 'Verde', hex: '#15803d' },
+  { name: 'Lima', hex: '#3f6212' },
   { name: 'Azul', hex: '#1e40af' },
   { name: 'Índigo', hex: '#4338ca' },
   { name: 'Violeta', hex: '#6d28d9' },
+  { name: 'Púrpura', hex: '#7e22ce' },
+  { name: 'Fucsia', hex: '#a21caf' },
   { name: 'Rosado', hex: '#be185d' },
   { name: 'Rojo', hex: '#b91c1c' },
   { name: 'Naranja', hex: '#c2410c' },
+  { name: 'Ámbar', hex: '#92400e' },
+  { name: 'Amarillo', hex: '#854d0e' },
   { name: 'Teal', hex: '#0f766e' },
   { name: 'Cian', hex: '#0e7490' },
+  { name: 'Sky', hex: '#0369a1' },
+];
+
+const PALETTE_GRID = [
+  ['#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a'],
+  ['#ea580c', '#c2410c', '#9a3412', '#7c2d12', '#431407'],
+  ['#d97706', '#b45309', '#92400e', '#78350f', '#451a03'],
+  ['#ca8a04', '#a16207', '#854d0e', '#713f12', '#422006'],
+  ['#16a34a', '#15803d', '#166534', '#14532d', '#052e16'],
+  ['#059669', '#065f46', '#047857', '#064e3b', '#022c22'],
+  ['#0d9488', '#0f766e', '#115e59', '#134e4a', '#042f2e'],
+  ['#0891b2', '#0e7490', '#155e75', '#164e63', '#083344'],
+  ['#2563eb', '#1e40af', '#1e3a8a', '#1e3a5f', '#172554'],
+  ['#4f46e5', '#4338ca', '#3730a3', '#312e81', '#1e1b4b'],
+  ['#7c3aed', '#6d28d9', '#5b21b6', '#4c1d95', '#2e1065'],
+  ['#db2777', '#be185d', '#9d174d', '#831843', '#500724'],
 ];
 
 interface FeatureFlag {
@@ -119,24 +141,46 @@ export default function ConfiguracionPage() {
         </div>
 
         <div className="mb-6">
-          <label className="block text-xs font-medium text-slate-500 mb-1">Color personalizado (hex)</label>
-          <div className="flex items-center gap-3">
+          <label className="block text-xs font-medium text-slate-500 mb-2">Paleta completa</label>
+          <div className="space-y-1.5">
+            {PALETTE_GRID.map((row, ri) => (
+              <div key={ri} className="flex gap-1.5">
+                {row.map((hex) => (
+                  <button
+                    key={hex}
+                    onClick={() => puedeEditar && setPrimaryColor(hex)}
+                    disabled={!puedeEditar}
+                    title={hex}
+                    className={`h-8 w-8 rounded-md shadow-sm ring-offset-1 transition-all hover:scale-110 hover:shadow-md ${
+                      primaryColor === hex ? 'ring-2 ring-slate-500 ring-offset-2 scale-110' : ''
+                    }`}
+                    style={{ backgroundColor: hex }}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <input
               type="color"
               value={primaryColor}
               onChange={(e) => puedeEditar && setPrimaryColor(e.target.value)}
               disabled={!puedeEditar}
-              className="h-10 w-16 cursor-pointer rounded-lg border border-slate-200 bg-transparent p-0.5"
+              className="h-9 w-9 cursor-pointer rounded-lg border border-slate-200 bg-transparent p-0.5"
             />
             <input
               type="text"
               value={primaryColor}
               onChange={(e) => puedeEditar && setPrimaryColor(e.target.value)}
               disabled={!puedeEditar}
-              className="w-28 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+              className="w-28 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 font-mono"
               placeholder="#065f46"
             />
           </div>
+          <div className="h-9 w-9 rounded-lg shadow-inner border" style={{ backgroundColor: primaryColor }} />
         </div>
 
         {/* Preview */}
