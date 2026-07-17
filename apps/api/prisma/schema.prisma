@@ -88,7 +88,7 @@ model Role {
   codigo      String   @unique @db.VarChar(50)
   nombre      String   @db.VarChar(100)
   descripcion String?  @db.Text
-  esSistema   Boolean  @default(false)
+  esSistema   Boolean  @default(false) @map("es_sistema")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
