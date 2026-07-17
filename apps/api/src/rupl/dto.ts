@@ -238,11 +238,30 @@ export class BuscarMapaDto {
 
   @IsOptional()
   @IsString()
+  producto?: string;
+
+  @IsOptional()
+  @IsString()
   codigoMunicipio?: string;
 
   @IsOptional()
   @IsString()
   codigoDepartamento?: string;
+
+  @IsOptional()
+  @IsString()
+  tipoPersona?: string;
+
+  @IsOptional()
+  @IsString()
+  estrato?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(5)
+  @Type(() => Number)
+  calificacionMin?: number;
 
   @IsOptional()
   @Type(() => Number)

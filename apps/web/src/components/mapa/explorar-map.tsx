@@ -28,9 +28,11 @@ export interface ProductorMapa {
   longitud: number;
   calificacionPromedio: number;
   estado: string;
+  tipoPersona?: string;
+  estrato?: string;
   codigoMunicipio: string;
   codigoDepartamento: string;
-  productos: { id: string; nombre: string; categoria: string }[];
+  productos: { id: string; nombre: string; categoria: string; precioReferencia?: number; unidadMedida?: string }[];
 }
 
 function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }) {

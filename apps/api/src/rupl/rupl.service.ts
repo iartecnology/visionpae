@@ -181,8 +181,12 @@ export class RuplService {
   async mapa(filtros: {
     q?: string;
     categorias?: string[];
+    producto?: string;
     codigoMunicipio?: string;
     codigoDepartamento?: string;
+    tipoPersona?: string;
+    estrato?: string;
+    calificacionMin?: number;
     limit?: number;
   }) {
     const where: any = { latitud: { not: null }, longitud: { not: null }, estado: 'activo' };
@@ -196,11 +200,16 @@ export class RuplService {
 
     if (filtros.codigoDepartamento) where.codigoDepartamento = filtros.codigoDepartamento;
     if (filtros.codigoMunicipio) where.codigoMunicipio = filtros.codigoMunicipio;
+    if (filtros.tipoPersona) where.tipoPersona = filtros.tipoPersona;
+    if (filtros.estrato) where.estrato = filtros.estrato;
+    if (filtros.calificacionMin) where.calificacionPromedio = { gte: filtros.calificacionMin };
 
-    if (filtros.categorias?.length) {
-      where.productos = {
-        some: { categoria: { in: filtros.categorias }, activo: true },
-      };
+    const productoFilter: any = { activo: true };
+    if (filtros.categorias?.length) productoFilter.categoria = { in: filtros.categorias };
+    if (filtros.producto) productoFilter.nombre = { contains: filtros.producto, mode: 'insensitive' };
+
+    if (filtros.categorias?.length || filtros.producto) {
+      where.productos = { some: productoFilter };
     }
 
     return this.prisma.productor.findMany({
@@ -213,11 +222,13 @@ export class RuplService {
         longitud: true,
         calificacionPromedio: true,
         estado: true,
+        tipoPersona: true,
+        estrato: true,
         codigoMunicipio: true,
         codigoDepartamento: true,
         productos: {
           where: { activo: true },
-          select: { id: true, nombre: true, categoria: true },
+          select: { id: true, nombre: true, categoria: true, precioReferencia: true, unidadMedida: true },
           take: 5,
         },
       },
