@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 // ============================================================
@@ -324,6 +325,7 @@ enum TipoDocumentoAcreditacion {
 enum CategoriaProducto {
   fruta
   verdura
+  hortaliza
   lacteo
   carnes
   granos
@@ -332,6 +334,8 @@ enum CategoriaProducto {
   bebidas
   huevos
   tuberculos
+  miel
+  procesado
   otros
 }
 
@@ -346,10 +350,58 @@ enum UnidadMedida {
   caneca
 }
 
+// ============================================================
+// CATÁLOGO BASE DE PRODUCTOS
+// ============================================================
+
+model ProductoBase {
+  id                    String           @id @default(uuid()) @db.Uuid
+  tenantId              String?          @map("tenant_id") @db.Uuid
+  codigoUnspsc          String?          @map("codigo_unspsc") @db.VarChar(20)
+  codigoSipsa           String?          @map("codigo_sipsa") @db.VarChar(20)
+  nombre                String           @db.VarChar(255)
+  categoria             CategoriaProducto
+  unidadMedidaDefecto   UnidadMedida     @map("unidad_medida_defecto")
+  atributosSchema       Json?            @map("atributos_schema") @db.JsonB
+  certificacionesRequeridas String[]     @map("certificaciones_requeridas")
+  fotoUrl               String?          @map("foto_url")
+  activo                Boolean          @default(true)
+  createdBy             String           @map("created_by") @db.Uuid
+  createdAt             DateTime         @default(now()) @map("created_at")
+  updatedAt             DateTime         @updatedAt @map("updated_at")
+
+  ofrecidos ProductoOfrecido[]
+
+  @@unique([tenantId, nombre])
+  @@map("productos_base")
+}
+
+model UnidadUnspsc {
+  codigo    String  @id @db.VarChar(20)
+  nombre    String  @db.VarChar(255)
+  nivel     Int
+  padreId   String? @map("padre_id") @db.VarChar(20)
+
+  @@map("unspsc")
+}
+
+model UnidadSipsa {
+  codigo    String           @id @db.VarChar(20)
+  nombre    String           @db.VarChar(255)
+  categoria CategoriaProducto
+
+  @@map("sipsa")
+}
+
+// ============================================================
+// PRODUCTO OFRECIDO POR EL PRODUCTOR
+// ============================================================
+
 model ProductoOfrecido {
   id                        String          @id @default(uuid()) @db.Uuid
   productorId               String          @map("productor_id") @db.Uuid
   tenantId                  String          @map("tenant_id") @db.Uuid
+  productoBaseId            String?         @map("producto_base_id") @db.Uuid
   nombre                    String          @db.VarChar(255)
   categoria                 CategoriaProducto
   unidadMedida              UnidadMedida    @map("unidad_medida")
@@ -357,19 +409,57 @@ model ProductoOfrecido {
   volumenMinimo             Decimal?        @map("volumen_minimo") @db.Decimal(12, 2)
   precioReferencia          Decimal?        @map("precio_referencia") @db.Decimal(14, 2)
   moneda                    String          @default("COP") @db.VarChar(3)
+  atributos                 Json?           @db.JsonB
+  fotos                     String[]        @default([])
   estacionalidad            Json?           @db.JsonB
   capacidadProduccionMensual Decimal?        @map("capacidad_produccion_mensual") @db.Decimal(12, 2)
   certificaciones           String[]        @default([])
+  estadoOferta              String          @default("pendiente") @map("estado_oferta") @db.VarChar(20)
+  revisadoPor               String?         @map("revisado_por") @db.Uuid
+  revisionNota              String?         @map("revision_nota") @db.Text
   activo                    Boolean         @default(true)
   createdAt                 DateTime        @default(now()) @map("created_at")
   updatedAt                 DateTime        @updatedAt @map("updated_at")
 
-  productor      Productor        @relation(fields: [productorId], references: [id], onDelete: Cascade)
-  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  productor      Productor            @relation(fields: [productorId], references: [id], onDelete: Cascade)
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  productoBase   ProductoBase?        @relation(fields: [productoBaseId], references: [id])
   itemsOrden     ItemOrdenCompra[]
+  presentaciones PresentacionProducto[]
+  historialPrecios HistorialPrecio[]
 
   @@index([tenantId, categoria, activo])
+  @@index([productoBaseId])
   @@map("productos_ofrecidos")
+}
+
+model PresentacionProducto {
+  id                  String       @id @default(uuid()) @db.Uuid
+  productoOfrecidoId  String       @map("producto_ofrecido_id") @db.Uuid
+  nombre              String       @db.VarChar(100)
+  volumen             Decimal      @db.Decimal(12, 2)
+  unidadMedida        UnidadMedida @map("unidad_medida")
+  precio              Decimal      @db.Decimal(14, 2)
+  stock               Decimal      @db.Decimal(12, 2)
+  activo              Boolean      @default(true)
+
+  productoOfrecido ProductoOfrecido @relation(fields: [productoOfrecidoId], references: [id], onDelete: Cascade)
+
+  @@map("presentaciones_producto")
+}
+
+model HistorialPrecio {
+  id                  String   @id @default(uuid()) @db.Uuid
+  productoOfrecidoId  String   @map("producto_ofrecido_id") @db.Uuid
+  precioAnterior      Decimal? @map("precio_anterior") @db.Decimal(14, 2)
+  precioNuevo         Decimal  @map("precio_nuevo") @db.Decimal(14, 2)
+  motivo              String?  @db.VarChar(255)
+  cambiadoPor         String   @map("cambiado_por") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  productoOfrecido ProductoOfrecido @relation(fields: [productoOfrecidoId], references: [id], onDelete: Cascade)
+
+  @@map("historial_precios")
 }
 
 enum TipoTransaccion {

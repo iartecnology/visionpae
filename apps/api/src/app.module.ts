@@ -16,6 +16,7 @@ import { ActasReciboModule } from './actas-recibo/actas-recibo.module';
 import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { SincronizacionModule } from './sincronizacion/sincronizacion.module';
 import { UbicacionModule } from './ubicacion/ubicacion.module';
+import { CatalogoModule } from './catalogo/catalogo.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -38,6 +39,7 @@ import { HealthController } from './health.controller';
     NotificacionesModule,
     SincronizacionModule,
     UbicacionModule,
+    CatalogoModule,
   ],
   controllers: [HealthController],
   providers: [

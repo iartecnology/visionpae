@@ -46,6 +46,7 @@ export const menuDefs: MenuItem[] = [
 ];
 
 export const adminMenuItems: MenuItem[] = [
+  { label: 'Catálogo Base', href: '/dashboard/admin/catalogo', icon: Package, recurso: 'catalogo' },
   { label: 'Entidades', href: '/dashboard/admin/tenants', icon: Building, recurso: 'tenants' },
   { label: 'Usuarios', href: '/dashboard/admin/usuarios', icon: UserCog, recurso: 'usuarios' },
   { label: 'Roles', href: '/dashboard/admin/roles', icon: Shield, recurso: 'roles' },

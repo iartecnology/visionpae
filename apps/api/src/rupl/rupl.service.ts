@@ -94,12 +94,32 @@ export class RuplService {
     const productor = await this.prisma.productor.findFirst({ where: { id: productorId, tenantId } });
     if (!productor) throw new NotFoundException('Productor no encontrado');
 
-    return this.prisma.productoOfrecido.create({
+    const { presentaciones, ...productData } = data;
+
+    const producto = await this.prisma.productoOfrecido.create({
       data: {
-        ...data as any,
+        ...productData as any,
         productorId,
         tenantId,
       },
+    });
+
+    if (presentaciones?.length) {
+      await this.prisma.presentacionProducto.createMany({
+        data: presentaciones.map((p) => ({
+          productoOfrecidoId: producto.id,
+          nombre: p.nombre,
+          volumen: p.volumen,
+          unidadMedida: p.unidadMedida as any,
+          precio: p.precio,
+          stock: p.stock,
+        })),
+      });
+    }
+
+    return this.prisma.productoOfrecido.findUnique({
+      where: { id: producto.id },
+      include: { presentaciones: true },
     });
   }
 

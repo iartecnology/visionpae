@@ -22,8 +22,8 @@ interface ProductoCatalogo {
 }
 
 const categorias = [
-  'fruta', 'verdura', 'lacteo', 'carnes', 'granos',
-  'panaderia', 'preparaciones', 'bebidas', 'huevos', 'tuberculos', 'otros',
+  'fruta', 'verdura', 'hortaliza', 'lacteo', 'carnes', 'granos',
+  'panaderia', 'preparaciones', 'bebidas', 'huevos', 'tuberculos', 'miel', 'procesado', 'otros',
 ];
 
 export default function CatalogoPage() {

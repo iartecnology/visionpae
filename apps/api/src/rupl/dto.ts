@@ -159,10 +159,14 @@ export class BuscarProductorDto {
 }
 
 export class CrearProductoOfrecidoDto {
+  @IsOptional()
+  @IsString()
+  productoBaseId?: string;
+
   @IsString()
   nombre: string;
 
-  @IsEnum(['fruta', 'verdura', 'lacteo', 'carnes', 'granos', 'panaderia', 'preparaciones', 'bebidas', 'huevos', 'tuberculos', 'otros'])
+  @IsEnum(['fruta', 'verdura', 'hortaliza', 'lacteo', 'carnes', 'granos', 'panaderia', 'preparaciones', 'bebidas', 'huevos', 'tuberculos', 'miel', 'procesado', 'otros'])
   categoria: string;
 
   @IsEnum(['kg', 'lb', 'unidad', 'litro', 'docena', 'arroba', 'bulto', 'caneca'])
@@ -184,6 +188,21 @@ export class CrearProductoOfrecidoDto {
 
   @IsOptional()
   estacionalidad?: any;
+
+  @IsOptional()
+  atributos?: any;
+
+  @IsOptional()
+  fotos?: string[];
+
+  @IsOptional()
+  presentaciones?: {
+    nombre: string;
+    volumen: number;
+    unidadMedida: string;
+    precio: number;
+    stock: number;
+  }[];
 }
 
 export class CrearDocumentoDto {
