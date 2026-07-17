@@ -58,7 +58,7 @@ export default function ExplorarPage() {
   const [tipoPersona, setTipoPersona] = useState('');
   const [estrato, setEstrato] = useState('');
   const [calificacionMin, setCalificacionMin] = useState(0);
-  const [ubicacion, setUbicacion] = useState<{ departamento?: string; municipio?: string }>({});
+  const [ubicacion, setUbicacion] = useState<{ pais?: string; departamento?: string; municipio?: string }>({});
   const [selected, setSelected] = useState<ProductorMapa | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -158,7 +158,7 @@ export default function ExplorarPage() {
             <LocationFilter
               compact
               value={ubicacion}
-              onChange={(v) => setUbicacion({ departamento: v.departamento, municipio: v.municipio })}
+              onChange={(v) => setUbicacion({ pais: v.pais, departamento: v.departamento, municipio: v.municipio })}
             />
           </div>
           {/* Mobile filter toggle */}

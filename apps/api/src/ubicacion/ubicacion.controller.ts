@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { PrismaService } from '../prisma.service';
 
@@ -7,9 +7,17 @@ import { PrismaService } from '../prisma.service';
 export class UbicacionController {
   constructor(private readonly prisma: PrismaService) {}
 
+  @Get('paises')
+  async paises() {
+    return this.prisma.pais.findMany({
+      orderBy: { nombre: 'asc' },
+    });
+  }
+
   @Get('departamentos')
-  async departamentos() {
+  async departamentos(@Query('pais') pais?: string) {
     return this.prisma.departamento.findMany({
+      where: pais ? { paisCodigo: pais } : undefined,
       orderBy: { nombre: 'asc' },
     });
   }

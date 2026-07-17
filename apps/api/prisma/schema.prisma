@@ -177,11 +177,23 @@ model AuditLog {
 // CATÁLOGOS TERRITORIALES DANE
 // ============================================================
 
-model Departamento {
+model Pais {
   codigo    String   @id @db.VarChar(2)
   nombre    String   @db.VarChar(100)
   createdAt DateTime @default(now()) @map("created_at")
 
+  departamentos Departamento[]
+
+  @@map("paises")
+}
+
+model Departamento {
+  codigo      String   @id @db.VarChar(2)
+  paisCodigo  String   @map("pais_codigo") @db.VarChar(2)
+  nombre      String   @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  pais       Pais       @relation(fields: [paisCodigo], references: [codigo])
   municipios Municipio[]
 
   @@map("departamentos")

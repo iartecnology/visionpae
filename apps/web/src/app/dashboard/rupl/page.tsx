@@ -65,7 +65,7 @@ export default function RuplPage() {
   const [search, setSearch] = useState('');
   const [tipoFilter, setTipoFilter] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('');
-  const [ubicacion, setUbicacion] = useState<{ departamento?: string; municipio?: string; vereda?: string }>({});
+  const [ubicacion, setUbicacion] = useState<{ pais?: string; departamento?: string; municipio?: string; vereda?: string }>({});
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async (page: number) => {

@@ -34,7 +34,7 @@ export default function CatalogoPage() {
   const [page, setPage] = useState(1);
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
-  const [ubicacion, setUbicacion] = useState<{ departamento?: string; municipio?: string }>({});
+  const [ubicacion, setUbicacion] = useState<{ pais?: string; departamento?: string; municipio?: string }>({});
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -83,7 +83,7 @@ export default function CatalogoPage() {
           </select>
           <LocationFilter
             value={ubicacion}
-            onChange={(v) => { setUbicacion({ departamento: v.departamento, municipio: v.municipio }); setPage(1); }}
+            onChange={(v) => { setUbicacion({ pais: v.pais, departamento: v.departamento, municipio: v.municipio }); setPage(1); }}
           />
         </div>
       </div>
