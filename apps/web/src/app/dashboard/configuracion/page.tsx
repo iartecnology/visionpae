@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useApiGet } from '@/lib/swr-api';
 
@@ -72,6 +72,9 @@ export default function ConfiguracionPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const [showPalette, setShowPalette] = useState(false);
+  const paletteRef = useRef<HTMLDivElement>(null);
+
   const [flags, setFlags] = useState<FeatureFlag[]>([]);
   const [flagsLoading, setFlagsLoading] = useState(true);
   const [togglingFlag, setTogglingFlag] = useState<string | null>(null);
@@ -140,26 +143,40 @@ export default function ConfiguracionPage() {
           ))}
         </div>
 
-        <div className="mb-6">
-          <label className="block text-xs font-medium text-slate-500 mb-2">Paleta completa</label>
-          <div className="space-y-1.5">
-            {PALETTE_GRID.map((row, ri) => (
-              <div key={ri} className="flex gap-1.5">
-                {row.map((hex) => (
-                  <button
-                    key={hex}
-                    onClick={() => puedeEditar && setPrimaryColor(hex)}
-                    disabled={!puedeEditar}
-                    title={hex}
-                    className={`h-8 w-8 rounded-md shadow-sm ring-offset-1 transition-all hover:scale-110 hover:shadow-md ${
-                      primaryColor === hex ? 'ring-2 ring-slate-500 ring-offset-2 scale-110' : ''
-                    }`}
-                    style={{ backgroundColor: hex }}
-                  />
-                ))}
+        {/* Color picker button + popover */}
+        <div className="relative mb-6">
+          <button
+            onClick={() => puedeEditar && setShowPalette(!showPalette)}
+            disabled={!puedeEditar}
+            className="flex items-center gap-3 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+          >
+            <div className="h-6 w-6 rounded-md shadow-inner border" style={{ backgroundColor: primaryColor }} />
+            <span className="text-slate-600">{primaryColor}</span>
+            <svg className={`ml-auto h-4 w-4 text-slate-400 transition-transform ${showPalette ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showPalette && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowPalette(false)} />
+              <div ref={paletteRef} className="absolute left-0 top-full z-50 mt-2 rounded-xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/10">
+                <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+                  {PALETTE_GRID.flat().map((hex) => (
+                    <button
+                      key={hex}
+                      onClick={() => { setPrimaryColor(hex); setShowPalette(false); }}
+                      title={hex}
+                      className={`h-6 w-6 rounded-md shadow-sm ring-offset-1 transition-all hover:scale-110 hover:shadow-md ${
+                        primaryColor === hex ? 'ring-2 ring-slate-500 ring-offset-1 scale-110' : ''
+                      }`}
+                      style={{ backgroundColor: hex }}
+                    />
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
