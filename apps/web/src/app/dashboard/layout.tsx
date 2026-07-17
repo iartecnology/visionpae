@@ -30,6 +30,29 @@ function hexToRgb(hex: string): string {
   return `${r}, ${g}, ${b}`;
 }
 
+function applyTenantColors(primaryColor: string) {
+  if (typeof window === 'undefined') return;
+  const root = document.documentElement;
+  root.style.setProperty('--tenant-primary', primaryColor);
+  root.style.setProperty('--tenant-primary-hover', adjustColor(primaryColor, -20));
+  root.style.setProperty('--tenant-primary-light', adjustColor(primaryColor, 50));
+  root.style.setProperty('--tenant-primary-bg', adjustColor(primaryColor, 90));
+  root.style.setProperty('--tenant-primary-rgb', hexToRgb(primaryColor));
+  root.style.setProperty('--tenant-primary-foreground', '#ffffff');
+  root.style.setProperty('--tenant-gradient-mid', adjustColor(primaryColor, -25));
+  root.style.setProperty('--tenant-gradient-end', adjustColor(primaryColor, -50));
+}
+
+try {
+  const cached = localStorage.getItem('tenantConfig');
+  if (cached) {
+    const config = JSON.parse(cached);
+    if (config.primaryColor) {
+      applyTenantColors(config.primaryColor);
+    }
+  }
+} catch { /* ignore */ }
+
 function SidebarLink({ item, pathname, onNavigate }: { item: MenuItem; pathname: string; onNavigate: () => void }) {
   if (!item.href) return null;
   const isActive = pathname.startsWith(item.href);
@@ -85,15 +108,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setTenantName(meData.tenant.nombre);
       const { config } = meData.tenant;
       const primaryColor = (config?.primaryColor as string) || '#065f46';
-      const root = document.documentElement;
-      root.style.setProperty('--tenant-primary', primaryColor);
-      root.style.setProperty('--tenant-primary-hover', adjustColor(primaryColor, -20));
-      root.style.setProperty('--tenant-primary-light', adjustColor(primaryColor, 50));
-      root.style.setProperty('--tenant-primary-bg', adjustColor(primaryColor, 90));
-      root.style.setProperty('--tenant-primary-rgb', hexToRgb(primaryColor));
-      root.style.setProperty('--tenant-primary-foreground', '#ffffff');
-      root.style.setProperty('--tenant-gradient-mid', adjustColor(primaryColor, -25));
-      root.style.setProperty('--tenant-gradient-end', adjustColor(primaryColor, -50));
+      applyTenantColors(primaryColor);
+      try { localStorage.setItem('tenantConfig', JSON.stringify({ primaryColor, tenantName: meData.tenant.nombre })); } catch { /* ignore */ }
     }
   }, [meData]);
 
@@ -148,7 +164,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         'fixed inset-y-0 left-0 z-40 flex w-64 flex-col shadow-[4px_0_24px_-8px_rgba(0,0,0,0.3)] transition-transform duration-300 lg:static lg:z-auto lg:w-56',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       )}
-        style={{ background: 'linear-gradient(to bottom, var(--tenant-primary, #065f46), var(--tenant-gradient-mid, #065f46), var(--tenant-gradient-end, #065f46))' }}
+        style={{ background: 'linear-gradient(to bottom, var(--tenant-primary), var(--tenant-gradient-mid), var(--tenant-gradient-end))' }}
       >
         <div className="flex h-14 shrink-0 items-center gap-2 border-b border-white/20 px-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg shadow-lg"
@@ -190,26 +206,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="hidden h-7 w-1 rounded-full sm:flex" style={{ background: 'linear-gradient(to bottom, var(--tenant-primary, #059669), var(--tenant-primary-hover, #065f46))' }} />
+            <span className="hidden h-7 w-1 rounded-full sm:flex" style={{ background: 'linear-gradient(to bottom, var(--tenant-primary), var(--tenant-primary-hover))' }} />
             <h2 className="text-sm font-semibold text-slate-700">PAE · {tenantName ? tenantName.split(' ').slice(0, 2).join(' ') : 'Boyacá'}</h2>
           </div>
           <div className="relative flex items-center gap-2 sm:gap-4" ref={dropdownRef}>
             <NotificationBell />
-            <span className="rounded-full px-3 py-1 text-xs font-medium ring-1"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--tenant-primary, #065f46) 10%, transparent)',
-                color: 'var(--tenant-primary, #065f46)',
-                borderColor: 'color-mix(in srgb, var(--tenant-primary, #065f46) 30%, transparent)',
-              }}
-            >
-              {userRole === 'super_admin' ? 'Super Admin' : userRole?.replace(/_/g, ' ') || 'Usuario'}
-            </span>
+              <span className="rounded-full px-3 py-1 text-xs font-medium ring-1"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--tenant-primary) 10%, transparent)',
+                  color: 'var(--tenant-primary)',
+                  borderColor: 'color-mix(in srgb, var(--tenant-primary) 30%, transparent)',
+                }}
+              >
+                {userRole === 'super_admin' ? 'Super Admin' : userRole?.replace(/_/g, ' ') || 'Usuario'}
+              </span>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-slate-100"
             >
               <div className="h-8 w-8 rounded-full shadow-md ring-2 ring-white"
-                style={{ background: 'linear-gradient(to bottom right, var(--tenant-primary-light, #34d399), var(--tenant-primary, #065f46))' }}
+                style={{ background: 'linear-gradient(to bottom right, var(--tenant-primary-light), var(--tenant-primary))' }}
               />
               <svg className={`h-4 w-4 text-slate-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
