@@ -42,7 +42,7 @@ function SidebarLink({ item, pathname, onNavigate }: { item: MenuItem; pathname:
         'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
         isActive
           ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]'
-          : 'text-emerald-200/70 hover:bg-white/10 hover:text-white'
+          : 'text-white/50 hover:bg-white/10 hover:text-white'
       )}
     >
       <item.icon className="h-4 w-4 shrink-0" />
@@ -248,7 +248,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-emerald-50/20">
+        <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-white to-slate-100/40">
           <div className="mx-auto max-w-7xl p-3 sm:p-6">
             {children}
           </div>
