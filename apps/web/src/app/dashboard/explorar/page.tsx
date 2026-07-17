@@ -154,7 +154,7 @@ export default function ExplorarPage() {
             </svg>
             <input
               type="text"
-              placeholder="Buscar productor…"
+              placeholder="Buscar producto…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -163,31 +163,34 @@ export default function ExplorarPage() {
         </div>
 
         {/* Product filters */}
-        <CollapsibleSection title="Producto" open={openSections.producto} onToggle={() => toggleSection('producto')}>
-          <input
-            type="text"
-            placeholder="Buscar por nombre de producto…"
-            value={productoSearch}
-            onChange={(e) => setProductoSearch(e.target.value)}
-            className="mb-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-          />
-          <div className="flex flex-wrap gap-1">
-            {CATEGORIAS.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => toggleCat(cat)}
-                className={cn(
-                  'rounded-full px-2 py-0.5 text-[10px] font-medium transition-colors',
-                  selectedCats.includes(cat)
-                    ? 'bg-primary text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                )}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </CollapsibleSection>
+          <CollapsibleSection title="Productos" open={openSections.producto} onToggle={() => toggleSection('producto')}>
+            <input
+              type="text"
+              placeholder="Buscar producto…"
+              value={productoSearch}
+              onChange={(e) => setProductoSearch(e.target.value)}
+              className="mb-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+            <div className="space-y-0.5">
+              {CATEGORIAS.map((cat) => (
+                <label
+                  key={cat}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs transition-colors',
+                    selectedCats.includes(cat) ? 'bg-primary/10 text-primary font-medium' : 'text-slate-600 hover:bg-slate-50'
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedCats.includes(cat)}
+                    onChange={() => toggleCat(cat)}
+                    className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary"
+                  />
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </label>
+              ))}
+            </div>
+          </CollapsibleSection>
 
         {/* Location filters */}
         <CollapsibleSection title="Ubicación" open={openSections.ubicacion} onToggle={() => toggleSection('ubicacion')}>
