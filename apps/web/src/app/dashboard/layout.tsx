@@ -92,6 +92,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       root.style.setProperty('--tenant-primary-bg', adjustColor(primaryColor, 90));
       root.style.setProperty('--tenant-primary-rgb', hexToRgb(primaryColor));
       root.style.setProperty('--tenant-primary-foreground', '#ffffff');
+      root.style.setProperty('--tenant-gradient-mid', adjustColor(primaryColor, -25));
+      root.style.setProperty('--tenant-gradient-end', adjustColor(primaryColor, -50));
     }
   }, [meData]);
 
@@ -146,7 +148,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         'fixed inset-y-0 left-0 z-40 flex w-64 flex-col shadow-[4px_0_24px_-8px_rgba(0,0,0,0.3)] transition-transform duration-300 lg:static lg:z-auto lg:w-56',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       )}
-        style={{ background: `linear-gradient(to bottom, var(--tenant-primary, #065f46), ${adjustColor('#065f46', -20)}, ${adjustColor('#065f46', -40)})` }}
+        style={{ background: 'linear-gradient(to bottom, var(--tenant-primary, #065f46), var(--tenant-gradient-mid, #065f46), var(--tenant-gradient-end, #065f46))' }}
       >
         <div className="flex h-14 shrink-0 items-center gap-2 border-b border-white/20 px-4">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg shadow-lg"
