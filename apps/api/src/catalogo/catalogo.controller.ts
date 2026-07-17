@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Patch, Delete,
-  Body, Param, Query, UseGuards, Req,
+  Body, Param, Query, UseGuards, Req, DefaultValuePipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
@@ -18,14 +18,12 @@ export class CatalogoController {
   async listarProductosBase(
     @Query('q') q?: string,
     @Query('categoria') categoria?: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
+    @Query('page', new DefaultValuePipe(1)) page: number = 1,
+    @Query('limit', new DefaultValuePipe(50)) limit: number = 50,
     @Req() req?: any,
   ) {
     return this.catalogo.listarProductosBase({
-      q, categoria,
-      page: page ?? 1,
-      limit: limit ?? 50,
+      q, categoria, page, limit,
       tenantId: req.user?.tenantId,
     });
   }
