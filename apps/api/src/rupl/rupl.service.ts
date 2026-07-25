@@ -382,6 +382,16 @@ export class RuplService {
     });
   }
 
+  async obtenerMiProducto(userId: string, prodId: string) {
+    const productor = await this.findProductorByUserId(userId);
+    const producto = await this.prisma.productoOfrecido.findFirst({
+      where: { id: prodId, productorId: productor.id },
+      include: { presentaciones: true },
+    });
+    if (!producto) throw new NotFoundException('Producto no encontrado');
+    return producto;
+  }
+
   async buscarProductos(filtros: {
     q?: string;
     categoria?: string;

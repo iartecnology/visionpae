@@ -13,6 +13,65 @@ import { CrearProductorDto, ActualizarProductorDto, BuscarProductorDto, CrearPro
 export class RuplController {
   constructor(private readonly rupl: RuplService) {}
 
+  // ---- Catálogo global de productos (static routes BEFORE :id) ----
+
+  @Get('/productos/buscar')
+  @UseGuards(AuthGuard('jwt'))
+  async buscarProductos(@Query() filtros: BuscarProductoDto, @Req() req: any) {
+    return this.rupl.buscarProductos({
+      ...filtros,
+      tenantId: req.user.tenantId,
+    });
+  }
+
+  // ---- Mis Productos (productor gestiona sus productos) ----
+
+  @Get('/mis-productos')
+  @UseGuards(AuthGuard('jwt'))
+  async misProductos(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Req() req?: any,
+  ) {
+    return this.rupl.misProductos(req.user.id, page, limit);
+  }
+
+  @Post('/mis-productos')
+  @UseGuards(AuthGuard('jwt'))
+  async crearMiProducto(@Body() dto: CrearProductoOfrecidoDto, @Req() req: any) {
+    return this.rupl.crearMiProducto(req.user.id, dto);
+  }
+
+  @Get('/mis-productos/:prodId')
+  @UseGuards(AuthGuard('jwt'))
+  async obtenerMiProducto(
+    @Param('prodId') prodId: string,
+    @Req() req: any,
+  ) {
+    return this.rupl.obtenerMiProducto(req.user.id, prodId);
+  }
+
+  @Patch('/mis-productos/:prodId')
+  @UseGuards(AuthGuard('jwt'))
+  async actualizarMiProducto(
+    @Param('prodId') prodId: string,
+    @Body() dto: any,
+    @Req() req: any,
+  ) {
+    return this.rupl.actualizarMiProducto(req.user.id, prodId, dto);
+  }
+
+  @Delete('/mis-productos/:prodId')
+  @UseGuards(AuthGuard('jwt'))
+  async eliminarMiProducto(
+    @Param('prodId') prodId: string,
+    @Req() req: any,
+  ) {
+    return this.rupl.eliminarMiProducto(req.user.id, prodId);
+  }
+
+  // ---- CRUD Productores (dynamic :id routes AFTER static) ----
+
   @Post()
   @UseGuards(AuthGuard('jwt'))
   async crear(@Body() dto: CrearProductorDto, @Req() req: any) {
@@ -47,7 +106,7 @@ export class RuplController {
     return this.rupl.desactivar(id, req.user.tenantId);
   }
 
-  // ---- Productos ----
+  // ---- Productos del productor ----
 
   @Post(':id/productos')
   @UseGuards(AuthGuard('jwt'))
@@ -165,53 +224,5 @@ export class RuplController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     return { url: `/uploads/${file.filename}`, originalName: file.originalname, mimeType: file.mimetype, size: file.size };
-  }
-
-  // ---- Mis Productos (productor gestiona sus productos) ----
-
-  @Get('/mis-productos')
-  @UseGuards(AuthGuard('jwt'))
-  async misProductos(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-    @Req() req?: any,
-  ) {
-    return this.rupl.misProductos(req.user.id, page, limit);
-  }
-
-  @Post('/mis-productos')
-  @UseGuards(AuthGuard('jwt'))
-  async crearMiProducto(@Body() dto: CrearProductoOfrecidoDto, @Req() req: any) {
-    return this.rupl.crearMiProducto(req.user.id, dto);
-  }
-
-  @Patch('/mis-productos/:prodId')
-  @UseGuards(AuthGuard('jwt'))
-  async actualizarMiProducto(
-    @Param('prodId') prodId: string,
-    @Body() dto: any,
-    @Req() req: any,
-  ) {
-    return this.rupl.actualizarMiProducto(req.user.id, prodId, dto);
-  }
-
-  @Delete('/mis-productos/:prodId')
-  @UseGuards(AuthGuard('jwt'))
-  async eliminarMiProducto(
-    @Param('prodId') prodId: string,
-    @Req() req: any,
-  ) {
-    return this.rupl.eliminarMiProducto(req.user.id, prodId);
-  }
-
-  // ---- Catálogo global de productos ----
-
-  @Get('/productos/buscar')
-  @UseGuards(AuthGuard('jwt'))
-  async buscarProductos(@Query() filtros: BuscarProductoDto, @Req() req: any) {
-    return this.rupl.buscarProductos({
-      ...filtros,
-      tenantId: req.user.tenantId,
-    });
   }
 }
