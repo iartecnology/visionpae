@@ -32,8 +32,8 @@ export interface MenuItem {
 export const menuDefs: MenuItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, recurso: 'dashboard' },
   { label: 'Explorar', href: '/dashboard/explorar', icon: Map },
-  { label: 'Catálogo', href: '/dashboard/catalogo', icon: Package, recurso: 'catalogo' },
-  { label: 'RUPL Productores', href: '/dashboard/rupl', icon: Users, recurso: 'rupl' },
+  { label: 'Catálogo', href: '/dashboard/catalogo', icon: Package },
+  { label: 'RUPL Productores', href: '/dashboard/rupl', icon: Users },
   { label: 'Compras', href: '/dashboard/compras', icon: ShoppingCart, recurso: 'compras' },
   { label: 'Certificaciones', href: '/dashboard/certificaciones', icon: FileCheck, recurso: 'certificaciones' },
   { label: 'Minutas', href: '/dashboard/minutas', icon: ScrollText, recurso: 'minutas' },
