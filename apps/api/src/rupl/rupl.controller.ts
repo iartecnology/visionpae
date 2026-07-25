@@ -33,7 +33,7 @@ export class RuplController {
     @Query('limit') limit?: number,
     @Req() req?: any,
   ) {
-    return this.rupl.misProductos(req.user.id, page, limit);
+    return this.rupl.misProductos(req.user.id, page ?? 1, limit ?? 50);
   }
 
   @Post('/mis-productos')
