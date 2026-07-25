@@ -15,8 +15,8 @@ export class RuplService {
     });
   }
 
-  async listar(filtros: BuscarProductorDto, tenantId: string) {
-    const where: any = { tenantId };
+  async listar(filtros: BuscarProductorDto, _tenantId: string) {
+    const where: any = {};
 
     if (filtros.estado) where.estado = filtros.estado;
     if (filtros.tipoPersona) where.tipoPersona = filtros.tipoPersona;
@@ -56,9 +56,9 @@ export class RuplService {
     };
   }
 
-  async obtener(id: string, tenantId: string) {
+  async obtener(id: string, _tenantId: string) {
     const productor = await this.prisma.productor.findFirst({
-      where: { id, tenantId },
+      where: { id },
       include: {
         productos: { where: { activo: true } },
         documentos: { orderBy: { createdAt: 'desc' } },
@@ -301,15 +301,96 @@ export class RuplService {
     });
   }
 
+  // ---- Mis Productos (productor gestiona sus propios productos) ----
+
+  async findProductorByUserId(userId: string) {
+    const productor = await this.prisma.productor.findFirst({ where: { userId } });
+    if (!productor) throw new NotFoundException('No se encontró un productor asociado a este usuario');
+    return productor;
+  }
+
+  async misProductos(userId: string, page = 1, limit = 50) {
+    const productor = await this.findProductorByUserId(userId);
+    const where = { productorId: productor.id, activo: true };
+    const [data, total] = await Promise.all([
+      this.prisma.productoOfrecido.findMany({
+        where,
+        include: { presentaciones: true },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.productoOfrecido.count({ where }),
+    ]);
+    return { data, meta: { page, limit, total } };
+  }
+
+  async crearMiProducto(userId: string, data: CrearProductoOfrecidoDto) {
+    const productor = await this.findProductorByUserId(userId);
+    const { presentaciones, ...productData } = data;
+
+    const producto = await this.prisma.productoOfrecido.create({
+      data: {
+        ...productData as any,
+        productorId: productor.id,
+        tenantId: productor.tenantId,
+      },
+    });
+
+    if (presentaciones?.length) {
+      await this.prisma.presentacionProducto.createMany({
+        data: presentaciones.map((p) => ({
+          productoOfrecidoId: producto.id,
+          nombre: p.nombre,
+          volumen: p.volumen,
+          unidadMedida: p.unidadMedida as any,
+          precio: p.precio,
+          stock: p.stock,
+        })),
+      });
+    }
+
+    return this.prisma.productoOfrecido.findUnique({
+      where: { id: producto.id },
+      include: { presentaciones: true },
+    });
+  }
+
+  async actualizarMiProducto(userId: string, prodId: string, data: any) {
+    const productor = await this.findProductorByUserId(userId);
+    const producto = await this.prisma.productoOfrecido.findFirst({
+      where: { id: prodId, productorId: productor.id },
+    });
+    if (!producto) throw new NotFoundException('Producto no encontrado');
+
+    return this.prisma.productoOfrecido.update({
+      where: { id: prodId },
+      data: data as any,
+    });
+  }
+
+  async eliminarMiProducto(userId: string, prodId: string) {
+    const productor = await this.findProductorByUserId(userId);
+    const producto = await this.prisma.productoOfrecido.findFirst({
+      where: { id: prodId, productorId: productor.id },
+    });
+    if (!producto) throw new NotFoundException('Producto no encontrado');
+
+    return this.prisma.productoOfrecido.update({
+      where: { id: prodId },
+      data: { activo: false },
+    });
+  }
+
   async buscarProductos(filtros: {
     q?: string;
     categoria?: string;
     codigoMunicipio?: string;
-    tenantId: string;
+    tenantId?: string;
     page?: number;
     limit?: number;
   }) {
-    const where: any = { activo: true, tenantId: filtros.tenantId };
+    const where: any = { activo: true };
     if (filtros.categoria) where.categoria = filtros.categoria;
     if (filtros.q) where.nombre = { contains: filtros.q, mode: 'insensitive' };
 

@@ -34,6 +34,7 @@ export const menuDefs: MenuItem[] = [
   { label: 'Explorar', href: '/dashboard/explorar', icon: Map },
   { label: 'Catálogo', href: '/dashboard/catalogo', icon: Package },
   { label: 'RUPL Productores', href: '/dashboard/rupl', icon: Users },
+  { label: 'Mis Productos', href: '/dashboard/rupl/mis-productos', icon: Package, recurso: 'mis_productos' },
   { label: 'Compras', href: '/dashboard/compras', icon: ShoppingCart, recurso: 'compras' },
   { label: 'Certificaciones', href: '/dashboard/certificaciones', icon: FileCheck, recurso: 'certificaciones' },
   { label: 'Minutas', href: '/dashboard/minutas', icon: ScrollText, recurso: 'minutas' },

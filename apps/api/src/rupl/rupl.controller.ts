@@ -167,6 +167,43 @@ export class RuplController {
     return { url: `/uploads/${file.filename}`, originalName: file.originalname, mimeType: file.mimetype, size: file.size };
   }
 
+  // ---- Mis Productos (productor gestiona sus productos) ----
+
+  @Get('/mis-productos')
+  @UseGuards(AuthGuard('jwt'))
+  async misProductos(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Req() req?: any,
+  ) {
+    return this.rupl.misProductos(req.user.id, page, limit);
+  }
+
+  @Post('/mis-productos')
+  @UseGuards(AuthGuard('jwt'))
+  async crearMiProducto(@Body() dto: CrearProductoOfrecidoDto, @Req() req: any) {
+    return this.rupl.crearMiProducto(req.user.id, dto);
+  }
+
+  @Patch('/mis-productos/:prodId')
+  @UseGuards(AuthGuard('jwt'))
+  async actualizarMiProducto(
+    @Param('prodId') prodId: string,
+    @Body() dto: any,
+    @Req() req: any,
+  ) {
+    return this.rupl.actualizarMiProducto(req.user.id, prodId, dto);
+  }
+
+  @Delete('/mis-productos/:prodId')
+  @UseGuards(AuthGuard('jwt'))
+  async eliminarMiProducto(
+    @Param('prodId') prodId: string,
+    @Req() req: any,
+  ) {
+    return this.rupl.eliminarMiProducto(req.user.id, prodId);
+  }
+
   // ---- Catálogo global de productos ----
 
   @Get('/productos/buscar')
