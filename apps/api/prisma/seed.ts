@@ -227,6 +227,25 @@ async function main() {
     },
   });
 
+  const productorUser = await prisma.user.upsert({
+    where: { tenantId_email: { tenantId: tunja.id, email: 'productor@pae.co' } },
+    update: {},
+    create: {
+      email: 'productor@pae.co',
+      passwordHash: hashedPassword,
+      nombreCompleto: 'Juan Pérez',
+      tipoDocumento: 'CC',
+      numeroDocumento: '111111111',
+      rol: 'productor',
+      tenantId: tunja.id,
+    },
+  });
+
+  await prisma.productor.update({
+    where: { id: productor.id },
+    data: { userId: productorUser.id },
+  });
+
   await prisma.productoOfrecido.createMany({
     data: [
       {

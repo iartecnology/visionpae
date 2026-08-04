@@ -10,6 +10,7 @@ const testUsers = [
   { label: 'Super Admin', email: 'superadmin@pae.co', password: 'admin123', badge: 'super_admin' },
   { label: 'Admin Tunja', email: 'admin@pae.co', password: 'admin123', badge: 'admin_entidad' },
   { label: 'Operador Tunja', email: 'operador@pae.co', password: 'admin123', badge: 'operador' },
+  { label: 'Productor Tunja', email: 'productor@pae.co', password: 'admin123', badge: 'productor' },
   { label: 'Admin Gobernación', email: 'admin@gobernacion.gov.co', password: 'admin123', badge: 'admin_entidad' },
   { label: 'Admin ICBF', email: 'admin@icbf.gov.co', password: 'admin123', badge: 'admin_entidad' },
 ];
