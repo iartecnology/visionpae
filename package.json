@@ -16,7 +16,8 @@
     "db:migrate": "pnpm --filter api db:migrate",
     "db:seed": "pnpm --filter api db:seed",
     "db:studio": "pnpm --filter api db:studio",
-    "clean": "turbo clean && rm -rf node_modules"
+    "clean": "turbo clean && rm -rf node_modules",
+    "postinstall": "pnpm db:generate"
   },
   "devDependencies": {
     "@turbo/gen": "^2.0.0",
