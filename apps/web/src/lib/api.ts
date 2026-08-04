@@ -1,6 +1,10 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL
-  ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, '')}/v1`
-  : 'http://localhost:3001/v1';
+const isBrowser = typeof window !== 'undefined';
+const BASE = isBrowser
+  ? '/v1'
+  : (process.env.NEXT_PUBLIC_API_URL
+      ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, '')}/v1`
+      : 'http://localhost:3001/v1');
+
 
 async function request<T>(path: string, opts: RequestInit = {}, isFormData = false): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
