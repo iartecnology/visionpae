@@ -105,9 +105,8 @@ export default function ExplorarPage() {
     return [5.5, -73.5];
   }, [productores, selected]);
 
-  const [showMobileMap, setShowMobileMap] = useState(false);
-
-  const activeCat = selectedCats.length === 1 ? selectedCats[0] : '';
+  const [mobileView, setMobileView] = useState<'split' | 'map'>('split');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const activeFilterChips = useMemo(() => {
     const chips: { label: string; onRemove: () => void }[] = [];
@@ -163,7 +162,7 @@ export default function ExplorarPage() {
           </div>
           {/* Mobile filter toggle */}
           <button
-            onClick={() => setShowMobileMap(false)}
+            onClick={() => setShowMobileFilters(true)}
             className={cn(
               'flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors sm:hidden',
               hasActiveFilters ? 'border-primary bg-primary/5 text-primary' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -173,6 +172,11 @@ export default function ExplorarPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             Filtros
+            {hasActiveFilters && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
+                {activeFilterChips.length}
+              </span>
+            )}
           </button>
         </div>
 
@@ -258,11 +262,46 @@ export default function ExplorarPage() {
       </div>
 
       {/* Results + Map */}
-      <div className="flex flex-1 gap-0 overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+        {/* Map */}
+        <div className={cn(
+          'relative order-1 shrink-0 overflow-hidden transition-all duration-300',
+          mobileView === 'map' ? 'flex-1' : 'h-[35vh]',
+          'lg:order-2 lg:h-auto lg:flex-1'
+        )}>
+          <ExplorarMap
+            productores={productores}
+            center={mapCenter}
+            zoom={selected ? 14 : 9}
+          />
+          {/* Mobile map toggle */}
+          <button
+            onClick={() => setMobileView(mobileView === 'map' ? 'split' : 'map')}
+            className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-xs font-medium text-slate-700 shadow-lg backdrop-blur-sm lg:hidden"
+          >
+            {mobileView === 'map' ? (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" />
+                </svg>
+                Ver listado
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                </svg>
+                Ver mapa
+              </>
+            )}
+          </button>
+        </div>
+
         {/* Results list */}
         <div className={cn(
-          'flex w-full flex-col overflow-hidden lg:w-[420px] lg:min-w-[420px]',
-          showMobileMap ? 'hidden lg:flex' : 'flex'
+          'order-2 flex flex-col overflow-hidden',
+          mobileView === 'map' ? 'hidden' : 'flex-1',
+          'lg:flex lg:w-[420px] lg:min-w-[420px]'
         )}>
           <div className="flex-1 overflow-y-auto bg-white">
             {isLoading ? (
@@ -306,7 +345,10 @@ export default function ExplorarPage() {
                   return (
                     <button
                       key={p.id}
-                      onClick={() => setSelected(p)}
+                      onClick={() => {
+                        setSelected(p);
+                        setMobileView('map');
+                      }}
                       className={cn(
                         'w-full border-b border-slate-50 px-4 py-3.5 text-left transition-all hover:bg-primary/[0.03]',
                         selected?.id === p.id ? 'bg-primary/[0.06] ring-1 ring-primary/20 ring-inset' : ''
@@ -368,21 +410,100 @@ export default function ExplorarPage() {
             )}
           </div>
         </div>
+      </div>
 
-        {/* Map */}
-        <div className={cn(
-          'flex-1 overflow-hidden lg:block',
-          showMobileMap ? 'block' : 'hidden'
-        )}>
-          <div className="h-full">
-            <ExplorarMap
-              productores={productores}
-              center={mapCenter}
-              zoom={selected ? 14 : 9}
-            />
+      {/* Mobile filter drawer */}
+      {showMobileFilters && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowMobileFilters(false)}
+          />
+          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl">
+            <div className="sticky top-0 z-10 bg-white px-5 pt-3 pb-0">
+              <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-300" />
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-base font-semibold text-slate-800">Filtros</h3>
+                <div className="flex items-center gap-3">
+                  {hasActiveFilters && (
+                    <button onClick={clearFilters} className="text-xs font-medium text-primary">
+                      Limpiar todo
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowMobileFilters(false)}
+                    className="rounded-full p-1 text-slate-400 hover:bg-slate-100"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-5 px-5 py-4">
+              {/* Ubicación */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-slate-500">Ubicación</label>
+                <LocationFilter
+                  compact
+                  value={ubicacion}
+                  onChange={(v) => setUbicacion({ pais: v.pais, departamento: v.departamento, municipio: v.municipio })}
+                />
+              </div>
+
+              {/* Tipo de persona */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-slate-500">Tipo de persona</label>
+                <select
+                  value={tipoPersona}
+                  onChange={(e) => setTipoPersona(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-primary"
+                >
+                  {TIPO_PERSONA.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+
+              {/* Estrato */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-slate-500">Estrato</label>
+                <select
+                  value={estrato}
+                  onChange={(e) => setEstrato(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-primary"
+                >
+                  {ESTRATOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+                </select>
+              </div>
+
+              {/* Calificación */}
+              <div>
+                <label className="mb-2 block text-xs font-medium text-slate-500">Calificación mínima</label>
+                <select
+                  value={calificacionMin}
+                  onChange={(e) => setCalificacionMin(Number(e.target.value))}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-primary"
+                >
+                  <option value={0}>Cualquier calificación</option>
+                  <option value={3}>3+ estrellas</option>
+                  <option value={4}>4+ estrellas</option>
+                  <option value={4.5}>4.5+ estrellas</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 border-t border-slate-100 bg-white px-5 py-4">
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90"
+              >
+                Ver {productores.length} resultado{productores.length !== 1 ? 's' : ''}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
