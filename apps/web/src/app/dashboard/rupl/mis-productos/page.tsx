@@ -73,12 +73,12 @@ export default function MisProductosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)]">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
           <h1 className="text-xl font-bold text-slate-800">Mis Productos</h1>
           <p className="mt-1 text-sm text-slate-500">Gestiona tus productos ofertados — {total} producto{total !== 1 ? 's' : ''}</p>
         </div>
-        <Button onClick={() => router.push('/dashboard/rupl/mis-productos/nuevo')}>
+        <Button onClick={() => router.push('/dashboard/rupl/mis-productos/nuevo')} className="w-full sm:w-auto">
           + Nuevo Producto
         </Button>
       </div>

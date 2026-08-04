@@ -62,14 +62,16 @@ export default function NuevoProductorPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-6 flex items-center gap-3">
-        <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-        <h1 className="text-xl font-semibold text-slate-800">Nuevo Productor</h1>
+      <div className="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-center sm:justify-between sm:mb-6 sm:p-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
+          <h1 className="text-xl font-semibold text-slate-800">Nuevo Productor</h1>
+        </div>
       </div>
 
       {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="space-y-5 rounded-lg border border-slate-200 bg-white p-6">
+      <form onSubmit={handleSubmit} className="space-y-5 rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Tipo de Persona</label>
@@ -166,9 +168,9 @@ export default function NuevoProductorPage() {
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-4">
-          <button type="button" onClick={() => router.back()} className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>
-          <button type="submit" disabled={saving} className="rounded-lg bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+        <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:justify-end sm:gap-3 border-t border-slate-200 pt-4">
+          <button type="button" onClick={() => router.back()} className="w-full sm:w-auto rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">Cancelar</button>
+          <button type="submit" disabled={saving} className="w-full sm:w-auto rounded-lg bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
             {saving ? 'Guardando...' : 'Guardar Productor'}
           </button>
         </div>

@@ -150,7 +150,7 @@ export default function NuevoProductoPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)]">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
           <h1 className="text-xl font-bold text-slate-800">Nuevo Producto</h1>
           <p className="mt-1 text-sm text-slate-500">Agregar producto al catálogo del productor</p>
@@ -265,9 +265,9 @@ export default function NuevoProductoPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-          <Button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Crear Producto'}</Button>
+        <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:justify-end sm:gap-3">
+          <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => router.back()}>Cancelar</Button>
+          <Button type="submit" disabled={saving} className="w-full sm:w-auto">{saving ? 'Guardando...' : 'Crear Producto'}</Button>
         </div>
       </form>
     </div>
