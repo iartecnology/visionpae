@@ -44,28 +44,32 @@ export default function OrdenDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:gap-3">
         <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-        <h1 className="text-xl font-semibold text-slate-800">Orden {orden.numero}</h1>
-        <Badge status={orden.estado} />
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">Orden {orden.numero}</h1>
+          <Badge status={orden.estado} />
+        </div>
       </div>
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Información General</h2>
+        <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 sm:gap-4">
           <div><dt className="text-slate-400">Productor</dt><dd className="font-medium text-slate-800">{orden.productor.razonSocial}</dd></div>
           <div><dt className="text-slate-400">Documento</dt><dd className="font-medium text-slate-800">{orden.productor.numeroDocumento}</dd></div>
           <div><dt className="text-slate-400">Municipio</dt><dd className="font-medium text-slate-800">{orden.productor.codigoMunicipio}</dd></div>
           <div><dt className="text-slate-400">Compra Local</dt><dd className="font-medium text-slate-800">{orden.esLocal ? 'Sí' : 'No'}</dd></div>
           <div><dt className="text-slate-400">Fecha de Emisión</dt><dd className="font-medium text-slate-800">{formatDate(orden.fechaEmision)}</dd></div>
           <div><dt className="text-slate-400">Fecha de Entrega</dt><dd className="font-medium text-slate-800">{formatDate(orden.fechaEntregaProgramada)}</dd></div>
-          <div className="col-span-2"><dt className="text-slate-400">Fundamento Legal</dt><dd className="font-medium text-slate-800">{orden.fundamentoLegal || '—'}</dd></div>
+          <div className="sm:col-span-2"><dt className="text-slate-400">Fundamento Legal</dt><dd className="font-medium text-slate-800">{orden.fundamentoLegal || '—'}</dd></div>
         </dl>
       </div>
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Items</h2>
-        <table className="w-full text-sm">
+      <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Items</h2>
+
+        {/* Desktop table */}
+        <table className="hidden w-full text-sm sm:table">
           <thead>
             <tr className="border-b border-slate-200 text-left text-xs font-semibold text-slate-500">
               <th className="pb-2">Producto</th>
@@ -93,6 +97,27 @@ export default function OrdenDetailPage() {
             </tr>
           </tfoot>
         </table>
+
+        {/* Mobile cards */}
+        <div className="flex flex-col gap-3 sm:hidden">
+          {orden.items.map((item) => (
+            <div key={item.id} className="rounded-lg border border-slate-100 p-3">
+              <p className="text-sm font-medium text-slate-800">{item.nombreProducto}</p>
+              <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                <span>{item.cantidadSolicitada} {item.unidadMedida}</span>
+                <span className="text-slate-300">×</span>
+                <span>{formatCurrency(item.precioUnitario)}/{item.unidadMedida}</span>
+              </div>
+              <div className="mt-1 text-right text-sm font-semibold text-slate-800">
+                {formatCurrency(item.subtotal)}
+              </div>
+            </div>
+          ))}
+          <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <span className="text-sm font-semibold text-slate-800">Total</span>
+            <span className="text-sm font-bold text-slate-800">{formatCurrency(orden.valorTotal)}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

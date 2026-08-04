@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface RuedaNegocio {
   id: string;
@@ -26,6 +27,13 @@ interface DemandaRueda {
   unidad: string;
   institucion: string;
 }
+
+const estadoOptions = [
+  { value: 'programada', label: 'Programada' },
+  { value: 'en_curso', label: 'En curso' },
+  { value: 'finalizada', label: 'Finalizada' },
+  { value: 'cancelada', label: 'Cancelada' },
+];
 
 const estadoColors: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   programada: 'outline',
@@ -73,14 +81,14 @@ export default function RuedasPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)]">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">🤝 Ruedas de Negocio</h1>
-          <p className="mt-1 text-sm text-slate-500">Organiza encuentros entre productores y compradores</p>
+          <h1 className="text-lg font-bold text-slate-800 sm:text-xl">🤝 Ruedas de Negocio</h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Organiza encuentros entre productores y compradores</p>
         </div>
-        <Link href="/dashboard/ruedas/nueva"><Button>+ Nueva Rueda</Button></Link>
+        <Link href="/dashboard/ruedas/nueva"><Button className="w-full sm:w-auto">+ Nueva Rueda</Button></Link>
       </div>
 
       {error && <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
@@ -88,57 +96,108 @@ export default function RuedasPage() {
       {loading ? (
         <div className="rounded-xl border border-slate-200 bg-white py-12 text-center text-sm text-slate-400 shadow-sm">Cargando...</div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="mb-3 flex items-center gap-2">
               <span className="flex h-5 w-1 rounded-full bg-gradient-to-b from-emerald-500 to-emerald-700" />
               <h2 className="text-sm font-semibold text-slate-700">Ruedas</h2>
             </div>
-            <Card className="overflow-hidden border-slate-200/60 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Lugar</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {ruedas.length === 0 ? (
-                      <TableRow><TableCell colSpan={6} className="text-center text-slate-400">No hay ruedas programadas</TableCell></TableRow>
-                    ) : ruedas.map((r) => (
-                      <TableRow key={r.id} className={selectedRueda === r.id ? 'bg-emerald-50/50' : 'hover:bg-slate-50'}>
-                        <TableCell className="font-medium text-slate-800">{r.nombre}</TableCell>
-                        <TableCell><Badge variant="outline">{r.tipo}</Badge></TableCell>
-                        <TableCell className="text-xs text-slate-500">
-                          {new Date(r.fechaInicio).toLocaleDateString('es-CO')} - {new Date(r.fechaFin).toLocaleDateString('es-CO')}
-                        </TableCell>
-                        <TableCell className="text-slate-500">{r.lugar || 'Virtual'}</TableCell>
-                        <TableCell>
-                          <select
-                            value={r.estado}
-                            onChange={(e) => cambiarEstado(r.id, e.target.value)}
-                            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 shadow-sm focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
-                          >
-                            <option value="programada">Programada</option>
-                            <option value="en_curso">En curso</option>
-                            <option value="finalizada">Finalizada</option>
-                            <option value="cancelada">Cancelada</option>
-                          </select>
-                        </TableCell>
-                        <TableCell>
-                          <button onClick={() => fetchDemandas(r.id)} className="text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:underline">Demandas</button>
-                        </TableCell>
+
+            {/* Desktop table */}
+            <div className="hidden lg:block">
+              <Card className="overflow-hidden border-slate-200/60 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead>Lugar</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead></TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {ruedas.length === 0 ? (
+                        <TableRow><TableCell colSpan={6} className="text-center text-slate-400">No hay ruedas programadas</TableCell></TableRow>
+                      ) : ruedas.map((r) => (
+                        <TableRow key={r.id} className={selectedRueda === r.id ? 'bg-emerald-50/50' : 'hover:bg-slate-50'}>
+                          <TableCell className="font-medium text-slate-800">{r.nombre}</TableCell>
+                          <TableCell><Badge variant="outline">{r.tipo}</Badge></TableCell>
+                          <TableCell className="text-xs text-slate-500">
+                            {new Date(r.fechaInicio).toLocaleDateString('es-CO')} - {new Date(r.fechaFin).toLocaleDateString('es-CO')}
+                          </TableCell>
+                          <TableCell className="text-slate-500">{r.lugar || 'Virtual'}</TableCell>
+                          <TableCell>
+                            <select
+                              value={r.estado}
+                              onChange={(e) => cambiarEstado(r.id, e.target.value)}
+                              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 shadow-sm focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                            >
+                              <option value="programada">Programada</option>
+                              <option value="en_curso">En curso</option>
+                              <option value="finalizada">Finalizada</option>
+                              <option value="cancelada">Cancelada</option>
+                            </select>
+                          </TableCell>
+                          <TableCell>
+                            <button onClick={() => fetchDemandas(r.id)} className="text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:underline">Demandas</button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="flex flex-col gap-3 lg:hidden">
+              {ruedas.length === 0 ? (
+                <div className="rounded-xl border border-slate-200 bg-white py-12 text-center text-sm text-slate-400 shadow-sm">No hay ruedas programadas</div>
+              ) : (
+                ruedas.map((r) => (
+                  <div
+                    key={r.id}
+                    onClick={() => fetchDemandas(r.id)}
+                    className={cn(
+                      'rounded-xl border border-slate-200/60 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] transition-all hover:border-emerald-200 hover:shadow-lg cursor-pointer',
+                      selectedRueda === r.id ? 'border-emerald-300 bg-emerald-50/30' : ''
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-semibold text-slate-800">{r.nombre}</p>
+                      <Badge variant="outline">{r.tipo}</Badge>
+                    </div>
+                    <div className="mt-2 space-y-1 text-xs text-slate-500">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-slate-400">📅</span>
+                        <span>{new Date(r.fechaInicio).toLocaleDateString('es-CO')} - {new Date(r.fechaFin).toLocaleDateString('es-CO')}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400">📍</span>
+                        <span>{r.lugar || 'Virtual'}</span>
+                      </div>
+                      <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                        <span className="text-slate-400">Estado:</span>
+                        <select
+                          value={r.estado}
+                          onChange={(e) => { e.stopPropagation(); cambiarEstado(r.id, e.target.value); }}
+                          className="flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 shadow-sm focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                        >
+                          <option value="programada">Programada</option>
+                          <option value="en_curso">En curso</option>
+                          <option value="finalizada">Finalizada</option>
+                          <option value="cancelada">Cancelada</option>
+                        </select>
+                      </div>
+                      <div className="pt-1 text-center text-xs font-medium text-emerald-600">Ver demandas →</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           <div>
@@ -160,7 +219,7 @@ export default function RuedasPage() {
                     <Link href={`/dashboard/ruedas/${selectedRueda}?tab=demandas`} className="block text-center text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:underline">Gestionar demandas →</Link>
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-400">Haz clic en &quot;Demandas&quot; de una rueda</p>
+                  <p className="text-sm text-slate-400">Haz clic en "Demandas" de una rueda</p>
                 )}
               </CardContent>
             </Card>
