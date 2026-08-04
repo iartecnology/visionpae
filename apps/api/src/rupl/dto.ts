@@ -66,6 +66,10 @@ export class CrearProductorDto {
 export class ActualizarProductorDto {
   @IsOptional()
   @IsString()
+  userId?: string;
+
+  @IsOptional()
+  @IsString()
   razonSocial?: string;
 
   @IsOptional()

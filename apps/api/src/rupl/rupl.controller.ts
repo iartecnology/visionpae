@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Patch, Delete,
-  Body, Param, Query, UseGuards, Req, UseInterceptors, UploadedFile,
+  Body, Param, Query, UseGuards, Req, UseInterceptors, UploadedFile, ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
@@ -97,6 +97,9 @@ export class RuplController {
     @Body() dto: ActualizarProductorDto,
     @Req() req: any,
   ) {
+    if (dto.userId && !req.user.roles.includes('super_admin')) {
+      throw new ForbiddenException('Solo un super_admin puede vincular un productor a un usuario');
+    }
     return this.rupl.actualizar(id, dto, req.user.tenantId);
   }
 
