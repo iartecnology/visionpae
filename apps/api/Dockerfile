@@ -12,8 +12,9 @@ RUN pnpm install --frozen-lockfile
 FROM base AS runner
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages ./packages
+COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY . .
-RUN pnpm --filter api build
+RUN pnpm --filter engine build && pnpm --filter shared build && pnpm --filter api build
 EXPOSE 3001
 ENV NODE_ENV=production
 CMD ["node", "apps/api/dist/main"]
