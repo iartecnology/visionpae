@@ -129,10 +129,10 @@ export default function ExplorarPage() {
   }, [search, selectedCats, tipoPersona, estrato, calificacionMin, ubicacion]);
 
   return (
-    <div className="flex h-[calc(100vh-7rem)] flex-col">
+    <div className="flex h-[calc(100vh-7rem)] flex-col overflow-hidden">
       {/* Search bar */}
-      <div className="relative z-20 shrink-0 border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center gap-3">
+      <div className="relative z-20 shrink-0 border-b border-slate-200 bg-white px-3 py-3 shadow-sm sm:px-4">
+        <div className="mx-auto flex max-w-7xl items-center gap-2 sm:gap-3">
           <div className="relative flex-1">
             <svg className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -303,7 +303,7 @@ export default function ExplorarPage() {
           mobileView === 'map' ? 'hidden' : 'flex-1',
           'lg:flex lg:w-[420px] lg:min-w-[420px]'
         )}>
-          <div className="flex-1 overflow-y-auto bg-white">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 text-sm text-slate-400">
                 <div className="mb-3 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary" />
@@ -360,9 +360,9 @@ export default function ExplorarPage() {
                         >
                           {initial}
                         </div>
-                        <div className="min-w-0 flex-1">
+                        <div className="min-w-0 flex-1 overflow-hidden">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold text-slate-800 truncate">{p.razonSocial}</p>
+                            <p className="min-w-0 flex-1 text-sm font-semibold text-slate-800 truncate">{p.razonSocial}</p>
                             <span className={cn(
                               'shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium',
                               p.estado === 'activo'
@@ -384,20 +384,17 @@ export default function ExplorarPage() {
                             </span>
                           </div>
                           {p.productos.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {p.productos.slice(0, 4).map((prod) => (
-                                <span key={prod.id} className="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-0.5 text-[10px] text-slate-600 ring-1 ring-slate-200/50">
-                                  {prod.nombre}
+                            <div className="mt-2 flex flex-wrap gap-1 overflow-hidden">
+                              {p.productos.slice(0, 3).map((prod) => (
+                                <span key={prod.id} className="inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-50 px-2 py-0.5 text-[10px] text-slate-600 ring-1 ring-slate-200/50">
+                                  <span className="truncate max-w-[100px]">{prod.nombre}</span>
                                   {prod.precioReferencia ? (
-                                    <span className="font-medium text-emerald-600">${Number(prod.precioReferencia).toLocaleString('es-CO')}</span>
+                                    <span className="shrink-0 font-medium text-emerald-600">${Number(prod.precioReferencia).toLocaleString('es-CO')}</span>
                                   ) : null}
-                                  {prod.unidadMedida && (
-                                    <span className="text-slate-400">/{prod.unidadMedida}</span>
-                                  )}
                                 </span>
                               ))}
-                              {p.productos.length > 4 && (
-                                <span className="text-[10px] text-slate-400">+{p.productos.length - 4} más</span>
+                              {p.productos.length > 3 && (
+                                <span className="text-[10px] text-slate-400">+{p.productos.length - 3} más</span>
                               )}
                             </div>
                           )}
