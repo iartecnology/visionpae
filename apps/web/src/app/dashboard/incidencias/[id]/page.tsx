@@ -66,14 +66,16 @@ export default function IncidenciaDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:gap-3">
         <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-        <h1 className="text-xl font-semibold text-slate-800">Incidencia</h1>
-        <Badge status={inc.estado} />
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">Incidencia</h1>
+          <Badge status={inc.estado} />
+        </div>
       </div>
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Información General</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><dt className="text-slate-400">Tipo</dt><dd className="font-medium capitalize text-slate-800">{inc.tipo.replace(/_/g, ' ')}</dd></div>
           <div><dt className="text-slate-400">Orden</dt><dd className="font-medium text-slate-800">#{inc.orden.numero}</dd></div>
@@ -88,35 +90,35 @@ export default function IncidenciaDetailPage() {
         </dl>
       </div>
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Descripción</h2>
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Descripción</h2>
         <p className="text-sm text-slate-700">{inc.descripcion}</p>
       </div>
 
       {inc.resolucion && (
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-sm font-semibold text-slate-700">Resolución</h2>
+        <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+          <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Resolución</h2>
           <p className="text-sm text-slate-700">{inc.resolucion}</p>
         </div>
       )}
 
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Actualizar Estado</h2>
-        <div className="flex items-end gap-4">
-          <div className="flex-1">
+      <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Actualizar Estado</h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
+          <div className="w-full sm:flex-1">
             <label className="mb-1 block text-xs text-slate-500">Nuevo Estado</label>
             <select value={nuevoEstado} onChange={(e) => setNuevoEstado(e.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500">
               {estados.map((e) => <option key={e} value={e}>{e.replace(/_/g, ' ')}</option>)}
             </select>
           </div>
-          <div className="flex-[2]">
+          <div className="w-full sm:flex-[2]">
             <label className="mb-1 block text-xs text-slate-500">Resolución (opcional)</label>
             <input value={resolucion} onChange={(e) => setResolucion(e.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
           </div>
           <button
             onClick={handleResolver}
             disabled={saving || nuevoEstado === inc.estado}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700 disabled:opacity-50 sm:w-auto"
           >
             {saving ? '...' : 'Actualizar'}
           </button>

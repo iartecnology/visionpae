@@ -31,10 +31,10 @@ export default function RuedaDetailPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-          <h1 className="text-xl font-semibold text-slate-800">{rueda.nombre}</h1>
+          <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">{rueda.nombre}</h1>
           <Badge status={rueda.estado} />
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 capitalize">{rueda.tipo}</span>
         </div>

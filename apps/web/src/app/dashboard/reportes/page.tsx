@@ -78,25 +78,25 @@ export default function ReportesPage() {
   if (loading) return <div className="rounded-xl border border-slate-200 bg-white py-12 text-center text-sm text-slate-400 shadow-sm">Cargando...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)]">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-start sm:justify-between sm:p-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">📈 Reportes</h1>
-          <p className="mt-1 text-sm text-slate-500">Datos agregados del sistema</p>
+          <h1 className="text-lg font-bold text-slate-800 sm:text-xl">📈 Reportes</h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Datos agregados del sistema</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
           <div className="flex items-center gap-2 text-sm">
-            <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="rounded-lg border border-slate-300 px-2 py-1 text-xs outline-none focus:border-emerald-500" />
+            <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-emerald-500 sm:flex-initial" />
             <span className="text-slate-400">—</span>
-            <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="rounded-lg border border-slate-300 px-2 py-1 text-xs outline-none focus:border-emerald-500" />
+            <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-emerald-500 sm:flex-initial" />
           </div>
-          <button onClick={exportCSV} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">Exportar CSV</button>
+          <button onClick={exportCSV} className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 sm:w-auto">Exportar CSV</button>
         </div>
       </div>
 
       {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
         <KpiCard label="Productores" value={resumen?.totalProductores ?? 0} color="emerald" />
         <KpiCard label="Órdenes" value={resumen?.totalOrdenes ?? 0} color="blue" />
         <KpiCard label="Recetas" value={resumen?.totalRecetas ?? 0} color="amber" />
@@ -120,7 +120,7 @@ export default function ReportesPage() {
         </ChartCard>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
         {categorias.length > 0 && (
           <ChartCard title="Productos por Categoría">
             <ResponsiveContainer width="100%" height={280}>
@@ -166,7 +166,7 @@ export default function ReportesPage() {
       )}
 
       {productores && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
           <ChartCard title="Por Estado">
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -201,17 +201,17 @@ function KpiCard({ label, value, color }: { label: string; value: string | numbe
     slate: 'border-slate-200/60 bg-gradient-to-br from-slate-50 to-white',
   };
   return (
-    <div className={`rounded-xl border p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] ${colors[color]}`}>
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-slate-800">{value}</p>
+    <div className={`rounded-xl border p-3 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:p-4 ${colors[color]}`}>
+      <p className="text-[10px] font-medium text-slate-500 sm:text-xs">{label}</p>
+      <p className="mt-1 text-base font-bold text-slate-800 sm:text-2xl">{value}</p>
     </div>
   );
 }
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-      <h3 className="mb-4 text-sm font-semibold text-slate-700">{title}</h3>
+    <div className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:p-5">
+      <h3 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">{title}</h3>
       {children}
     </div>
   );

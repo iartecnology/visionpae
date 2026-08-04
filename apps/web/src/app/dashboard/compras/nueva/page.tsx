@@ -86,12 +86,12 @@ function NuevaOrdenForm() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)]">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">📝 Nueva Orden de Compra</h1>
-          <p className="mt-1 text-sm text-slate-500">Crear una orden para la entrega de productos</p>
+          <h1 className="text-lg font-bold text-slate-800 sm:text-xl">📝 Nueva Orden de Compra</h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Crear una orden para la entrega de productos</p>
         </div>
-        <Button variant="outline" onClick={() => router.back()}>Cancelar</Button>
+        <Button variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">Cancelar</Button>
       </div>
 
       {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">{error}</div>}
@@ -150,11 +150,11 @@ function NuevaOrdenForm() {
                     <span className="text-xs font-medium text-slate-500">Item #{idx + 1}</span>
                     <button type="button" onClick={() => removeItem(idx)} className="text-xs text-red-500 hover:text-red-700">✕ Eliminar</button>
                   </div>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                     <select
                       value={item.productoId}
                       onChange={(e) => updateItem(idx, 'productoId', e.target.value)}
-                      className="col-span-2 rounded-md border border-input bg-white px-2 py-1.5 text-xs outline-none focus:border-emerald-400"
+                      className="col-span-2 rounded-md border border-input bg-white px-2 py-1.5 text-xs outline-none focus:border-emerald-400 sm:col-span-2"
                     >
                       <option value="">Producto...</option>
                       {productos.map((p) => (<option key={p.id} value={p.id}>{p.nombre}</option>))}
@@ -175,9 +175,9 @@ function NuevaOrdenForm() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-          <Button type="submit" disabled={saving || form.items.length === 0 || !form.contratoId}>
+        <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:justify-end sm:gap-3">
+          <Button type="button" variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">Cancelar</Button>
+          <Button type="submit" disabled={saving || form.items.length === 0 || !form.contratoId} className="w-full sm:w-auto">
             {saving ? 'Creando...' : 'Crear Orden'}
           </Button>
         </div>

@@ -49,14 +49,16 @@ export default function ActaDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:gap-3">
         <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-        <h1 className="text-xl font-semibold text-slate-800">Acta de Recibo</h1>
-        <Badge status={acta.estado} />
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">Acta de Recibo</h1>
+          <Badge status={acta.estado} />
+        </div>
       </div>
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Información General</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><dt className="text-slate-400">Orden</dt><dd className="font-medium text-slate-800">#{acta.orden.numero}</dd></div>
           <div><dt className="text-slate-400">Valor Total</dt><dd className="font-medium text-slate-800">{formatCurrency(acta.orden.valorTotal)}</dd></div>
@@ -66,9 +68,11 @@ export default function ActaDetailPage() {
         </dl>
       </div>
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Items de la Orden</h2>
-        <table className="w-full text-sm">
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Items de la Orden</h2>
+
+        {/* Desktop table */}
+        <table className="hidden w-full text-sm sm:table">
           <thead>
             <tr className="border-b border-slate-100">
               <th className="px-3 py-2 text-left text-xs font-medium text-slate-500">Producto</th>
@@ -88,18 +92,35 @@ export default function ActaDetailPage() {
             ))}
           </tbody>
         </table>
+
+        {/* Mobile cards */}
+        <div className="flex flex-col gap-2 sm:hidden">
+          {acta.orden.items.map((item) => (
+            <div key={item.id} className="rounded-lg border border-slate-100 p-3">
+              <div className="flex items-start justify-between">
+                <p className="text-sm font-medium text-slate-800">{item.nombreProducto}</p>
+                <p className="text-sm font-semibold text-slate-800">{formatCurrency(item.subtotal)}</p>
+              </div>
+              <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                <span>{item.cantidadSolicitada} {item.unidadMedida}</span>
+                <span className="text-slate-300">×</span>
+                <span>{formatCurrency(item.precioUnitario)}/{item.unidadMedida}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {acta.itemsVerificados && acta.itemsVerificados.length > 0 && (
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-sm font-semibold text-slate-700">Items Verificados</h2>
+        <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+          <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Items Verificados</h2>
           <pre className="text-xs text-slate-500">{JSON.stringify(acta.itemsVerificados, null, 2)}</pre>
         </div>
       )}
 
       {(acta.firmaInterventorUrl || acta.firmaProductorUrl || acta.actaPdfUrl) && (
-        <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-sm font-semibold text-slate-700">Documentos</h2>
+        <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+          <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Documentos</h2>
           <div className="space-y-2 text-sm">
             {acta.firmaInterventorUrl && <p><a href={acta.firmaInterventorUrl} target="_blank" className="text-emerald-600 hover:underline">Firma del Interventor</a></p>}
             {acta.firmaProductorUrl && <p><a href={acta.firmaProductorUrl} target="_blank" className="text-emerald-600 hover:underline">Firma del Productor</a></p>}

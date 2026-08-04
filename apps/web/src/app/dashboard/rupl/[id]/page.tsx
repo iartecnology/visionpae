@@ -107,19 +107,19 @@ export default function DetalleProductorPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-          <h1 className="text-xl font-semibold text-slate-800">{productor.razonSocial}</h1>
+          <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">{productor.razonSocial}</h1>
           <Badge status={productor.estado} />
         </div>
-        <Link href={`/dashboard/rupl/${params.id}/editar`}>
-          <Button variant="outline" size="sm">✏️ Editar</Button>
+        <Link href={`/dashboard/rupl/${params.id}/editar`} className="flex-1 sm:flex-initial">
+          <Button variant="outline" size="sm" className="w-full">✏️ Editar</Button>
         </Link>
       </div>
 
-      <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
+      <div className="mb-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:mb-6 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Información General</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><dt className="text-slate-400">Razón Social</dt><dd className="font-medium text-slate-800">{productor.razonSocial}</dd></div>
           <div><dt className="text-slate-400">Nombre Comercial</dt><dd className="font-medium text-slate-800">{productor.nombreComercial || '—'}</dd></div>
@@ -137,8 +137,8 @@ export default function DetalleProductorPage() {
       </div>
 
       {productor.latitud && productor.longitud && (
-        <div className="mb-6 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-          <div className="p-6 pb-3">
+        <div className="mb-4 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:mb-6">
+          <div className="p-4 pb-3 sm:p-6">
             <h2 className="text-sm font-semibold text-slate-700">Ubicación</h2>
             <p className="mt-1 text-xs text-slate-400">{Number(productor.latitud).toFixed(5)}, {Number(productor.longitud).toFixed(5)}</p>
           </div>
@@ -146,8 +146,8 @@ export default function DetalleProductorPage() {
         </div>
       )}
 
-      <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:mb-6 sm:p-6">
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
           <h2 className="text-sm font-semibold text-slate-700">Calificación</h2>
         </div>
         <div className="flex items-center gap-3">
@@ -157,11 +157,11 @@ export default function DetalleProductorPage() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:mb-6 sm:p-6">
+        <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Productos Ofrecidos</h2>
-          <Link href={`/dashboard/rupl/${params.id}/productos/nuevo`}>
-            <Button size="sm">+ Agregar</Button>
+          <Link href={`/dashboard/rupl/${params.id}/productos/nuevo`} className="flex-1 sm:flex-initial">
+            <Button size="sm" className="w-full">+ Agregar</Button>
           </Link>
         </div>
         {(!productor.productos || productor.productos.length === 0) ? (
@@ -185,11 +185,11 @@ export default function DetalleProductorPage() {
         )}
       </div>
 
-      <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:p-6">
+        <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Documentos</h2>
-          <Link href={`/dashboard/rupl/${params.id}/documentos/nuevo`}>
-            <Button size="sm">+ Adjuntar</Button>
+          <Link href={`/dashboard/rupl/${params.id}/documentos/nuevo`} className="flex-1 sm:flex-initial">
+            <Button size="sm" className="w-full">+ Adjuntar</Button>
           </Link>
         </div>
         {(!productor.documentos || productor.documentos.length === 0) ? (

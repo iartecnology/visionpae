@@ -74,18 +74,18 @@ export default function ContratosPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)]">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">📋 Contratos Marco</h1>
-          <p className="mt-1 text-sm text-slate-500">Gestiona los contratos del PAE</p>
+          <h1 className="text-lg font-bold text-slate-800 sm:text-xl">📋 Contratos Marco</h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Gestiona los contratos del PAE</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/dashboard/compras">
-            <Button variant="outline">Órdenes</Button>
+          <Link href="/dashboard/compras" className="flex-1 sm:flex-initial">
+            <Button variant="outline" className="w-full">Órdenes</Button>
           </Link>
-          <Link href="/dashboard/compras/contratos/nuevo">
-            <Button>+ Nuevo Contrato</Button>
+          <Link href="/dashboard/compras/contratos/nuevo" className="flex-1 sm:flex-initial">
+            <Button className="w-full">+ Nuevo Contrato</Button>
           </Link>
         </div>
       </div>
@@ -93,14 +93,48 @@ export default function ContratosPage() {
       {loading ? (
         <div className="rounded-xl border border-slate-200 bg-white py-12 text-center text-sm text-slate-400 shadow-sm">Cargando...</div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-          <Table
-            columns={columns}
-            data={data}
-            keyExtractor={(c) => c.id}
-            onRowClick={(c) => router.push(`/dashboard/compras/contratos/${c.id}`)}
-          />
-        </div>
+        <>
+          {/* Desktop table */}
+          <div className="hidden overflow-hidden rounded-xl border border-slate-200/60 bg-white shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:block">
+            <Table
+              columns={columns}
+              data={data}
+              keyExtractor={(c) => c.id}
+              onRowClick={(c) => router.push(`/dashboard/compras/contratos/${c.id}`)}
+            />
+          </div>
+
+          {/* Mobile cards */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {data.length === 0 ? (
+              <div className="rounded-xl border border-slate-200 bg-white py-12 text-center text-sm text-slate-400 shadow-sm">No hay contratos</div>
+            ) : (
+              data.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => router.push(`/dashboard/compras/contratos/${c.id}`)}
+                  className="w-full rounded-xl border border-slate-200/60 bg-white p-4 text-left shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] transition-all hover:border-emerald-200 hover:shadow-lg"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-800">{c.numero}</p>
+                      <p className="mt-0.5 text-xs text-slate-500 line-clamp-2">{c.objeto}</p>
+                    </div>
+                    <Badge status={c.estado} />
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <span className="rounded bg-slate-100 px-2 py-0.5 font-medium">{c.tipo}</span>
+                    <span className="text-slate-300">·</span>
+                    <span className="text-slate-600">{formatCurrency(c.valorTotal)}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-slate-400">
+                    {formatDate(c.periodoInicio)} — {formatDate(c.periodoFin)}
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </>
       )}
     </div>
   );

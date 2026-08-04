@@ -64,12 +64,12 @@ export default function NuevoContratoPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)]">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">📋 Nuevo Contrato</h1>
-          <p className="mt-1 text-sm text-slate-500">Crear contrato marco del PAE</p>
+          <h1 className="text-lg font-bold text-slate-800 sm:text-xl">📋 Nuevo Contrato</h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Crear contrato marco del PAE</p>
         </div>
-        <Button variant="outline" onClick={() => router.back()}>Cancelar</Button>
+        <Button variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">Cancelar</Button>
       </div>
 
       {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">{error}</div>}
@@ -149,9 +149,9 @@ export default function NuevoContratoPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 flex justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-          <Button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Crear Contrato'}</Button>
+        <div className="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:justify-end sm:gap-3">
+          <Button type="button" variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">Cancelar</Button>
+          <Button type="submit" disabled={saving} className="w-full sm:w-auto">{saving ? 'Guardando...' : 'Crear Contrato'}</Button>
         </div>
       </form>
     </div>

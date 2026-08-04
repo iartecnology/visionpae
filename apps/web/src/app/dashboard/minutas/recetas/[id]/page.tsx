@@ -31,10 +31,10 @@ export default function RecetaDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-          <h1 className="text-xl font-semibold text-slate-800">{receta.nombre}</h1>
+          <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">{receta.nombre}</h1>
           <Badge status={receta.activo ? 'activo' : 'inactivo'} />
         </div>
       </div>
@@ -58,12 +58,12 @@ export default function RecetaDetailPage() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
+      <div className="mb-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:mb-6 sm:p-6">
         <h2 className="mb-3 text-sm font-semibold text-slate-700">Instrucciones</h2>
         <p className="whitespace-pre-wrap text-sm text-slate-600">{receta.instrucciones}</p>
       </div>
 
-      <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
+      <div className="mb-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:mb-6 sm:p-6">
         <h2 className="mb-3 text-sm font-semibold text-slate-700">Ingredientes ({receta.ingredientes?.length || 0})</h2>
         {(!receta.ingredientes || receta.ingredientes.length === 0) ? (
           <p className="text-sm text-slate-400">Sin ingredientes registrados</p>
@@ -84,7 +84,7 @@ export default function RecetaDetailPage() {
       </div>
 
       {receta.etiquetaCultural?.length > 0 && (
-        <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
+        <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:p-6">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">Etiquetas Culturales</h2>
           <div className="flex flex-wrap gap-1.5">
             {receta.etiquetaCultural.map((t) => <span key={t} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{t}</span>)}

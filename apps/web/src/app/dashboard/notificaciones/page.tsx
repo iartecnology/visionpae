@@ -56,22 +56,22 @@ export default function NotificacionesPage() {
   const displayData = filter === 'noLeidas' ? data.filter((n) => !n.leida) : data;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)]">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_2px_12px_-6px_rgba(0,0,0,0.08)] sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">Notificaciones</h1>
-          <p className="mt-1 text-sm text-slate-500">Historial de notificaciones del sistema</p>
+          <h1 className="text-lg font-bold text-slate-800 sm:text-xl">Notificaciones</h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">Historial de notificaciones del sistema</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setFilter('todas')}
-            className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${filter === 'todas' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`flex-1 rounded-lg px-3 py-1.5 text-sm transition-colors sm:flex-initial ${filter === 'todas' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             Todas
           </button>
           <button
             onClick={() => setFilter('noLeidas')}
-            className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${filter === 'noLeidas' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`flex-1 rounded-lg px-3 py-1.5 text-sm transition-colors sm:flex-initial ${filter === 'noLeidas' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             No leídas
           </button>
@@ -90,7 +90,7 @@ export default function NotificacionesPage() {
                 <button
                   key={n.id}
                   onClick={() => handleClick(n)}
-                  className={`flex w-full items-start gap-4 px-6 py-4 text-left transition-colors hover:bg-slate-50 ${!n.leida ? 'bg-emerald-50/30' : ''}`}
+                  className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 sm:gap-4 sm:px-6 sm:py-4 ${!n.leida ? 'bg-emerald-50/30' : ''}`}
                 >
                   <span className="mt-0.5 text-lg">{iconMap[n.tipo] || '🔔'}</span>
                   <div className="min-w-0 flex-1">
@@ -98,7 +98,7 @@ export default function NotificacionesPage() {
                       <p className={`text-sm ${n.leida ? 'text-slate-600' : 'font-semibold text-slate-800'}`}>{n.titulo}</p>
                       {!n.leida && <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />}
                     </div>
-                    <p className="mt-0.5 text-sm text-slate-500">{n.mensaje}</p>
+                    <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{n.mensaje}</p>
                     <p className="mt-1 text-xs text-slate-300">{formatDate(n.fecha)}</p>
                   </div>
                 </button>

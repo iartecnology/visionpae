@@ -47,14 +47,16 @@ export default function CertificacionDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:gap-3">
         <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-        <h1 className="text-xl font-semibold text-slate-800">{cert.numeroExpediente}</h1>
-        <Badge status={cert.estado} />
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">{cert.numeroExpediente}</h1>
+          <Badge status={cert.estado} />
+        </div>
       </div>
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Información General</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><dt className="text-slate-400">Contrato</dt><dd className="font-medium text-slate-800">{cert.contrato.numero}</dd></div>
           <div><dt className="text-slate-400">Categoría Producto</dt><dd className="font-medium text-slate-800">{cert.productoCategoria}</dd></div>
@@ -72,8 +74,8 @@ export default function CertificacionDetailPage() {
       </div>
 
       {cert.referenciados.length > 0 && (
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-sm font-semibold text-slate-700">Productores Referenciados (No Locales)</h2>
+        <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 sm:mb-6 sm:p-6">
+          <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Productores Referenciados (No Locales)</h2>
           <div className="divide-y divide-slate-100">
             {cert.referenciados.map((r) => (
               <div key={r.id} className="py-3">
@@ -85,8 +87,8 @@ export default function CertificacionDetailPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Evidencias</h2>
+      <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Evidencias</h2>
         {cert.evidencias.length === 0 ? (
           <p className="text-sm text-slate-400">No hay evidencias registradas</p>
         ) : (

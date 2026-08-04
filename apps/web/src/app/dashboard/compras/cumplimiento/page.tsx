@@ -61,16 +61,16 @@ export default function CumplimientoPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-800">Cumplimiento Ley 2046</h1>
-        <p className="mt-1 text-sm text-slate-500">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">Cumplimiento Ley 2046</h1>
+        <p className="mt-1 text-xs text-slate-500 sm:text-sm">
           Monitoreo del porcentaje de compras locales (meta mínima 30%)
         </p>
       </div>
 
-      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
+      <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3 sm:mb-6 sm:p-4">
         <label className="mb-1 block text-sm font-medium text-slate-700">Contrato Marco</label>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <input
             value={contratoId}
             onChange={(e) => setContratoId(e.target.value)}
@@ -79,7 +79,7 @@ export default function CumplimientoPage() {
           />
           <button
             onClick={() => load(contratoId)}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700 sm:w-auto"
           >
             Consultar
           </button>
@@ -116,7 +116,7 @@ export default function CumplimientoPage() {
 
           <div className="rounded-lg border border-slate-200 bg-white p-4">
             <h2 className="mb-4 text-sm font-semibold text-slate-700">Simulador de Escenarios</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
               <div>
                 <label className="mb-1 block text-xs text-slate-500">Productor ID</label>
                 <input
@@ -134,7 +134,7 @@ export default function CumplimientoPage() {
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500"
                 />
               </div>
-              <div className="flex items-end gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-2">
                 <label className="flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm">
                   <input
                     type="checkbox"
@@ -147,7 +147,7 @@ export default function CumplimientoPage() {
                 <button
                   onClick={handleSimular}
                   disabled={simLoading}
-                  className="rounded-lg bg-amber-600 px-4 py-2 text-sm text-white hover:bg-amber-700 disabled:opacity-50"
+                  className="w-full rounded-lg bg-amber-600 px-4 py-2 text-sm text-white hover:bg-amber-700 disabled:opacity-50 sm:w-auto"
                 >
                   {simLoading ? '...' : 'Simular'}
                 </button>

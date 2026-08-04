@@ -57,16 +57,16 @@ export default function ContratoDetailPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-4 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => router.back()} className="text-sm text-slate-500 hover:text-slate-700">&larr; Volver</button>
-          <h1 className="text-xl font-semibold text-slate-800">Contrato {contrato.numero}</h1>
+          <h1 className="text-lg font-semibold text-slate-800 sm:text-xl">Contrato {contrato.numero}</h1>
           <Badge status={contrato.estado} />
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{tipoLabel[contrato.tipo] || contrato.tipo}</span>
         </div>
         <div className="flex gap-2">
-          <Link href={`/dashboard/compras?contratoId=${contrato.id}`}>
-            <Button variant="outline" size="sm">Ver Órdenes</Button>
+          <Link href={`/dashboard/compras?contratoId=${contrato.id}`} className="flex-1 sm:flex-initial">
+            <Button variant="outline" size="sm" className="w-full">Ver Órdenes</Button>
           </Link>
         </div>
       </div>
@@ -87,8 +87,8 @@ export default function ContratoDetailPage() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-        <h2 className="mb-4 text-sm font-semibold text-slate-700">Información General</h2>
+      <div className="mb-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:mb-6 sm:p-6">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 sm:mb-4">Información General</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div><dt className="text-slate-400">Objeto</dt><dd className="font-medium text-slate-800 col-span-2">{contrato.objeto}</dd></div>
           <div><dt className="text-slate-400">Período</dt><dd className="font-medium text-slate-800">{formatDate(contrato.periodoInicio)} — {formatDate(contrato.periodoFin)}</dd></div>
@@ -97,11 +97,11 @@ export default function ContratoDetailPage() {
         </dl>
       </div>
 
-      <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)] sm:p-6">
+        <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Órdenes de Compra</h2>
-          <Link href={`/dashboard/compras/nueva?contratoId=${contrato.id}`}>
-            <Button size="sm">+ Nueva Orden</Button>
+          <Link href={`/dashboard/compras/nueva?contratoId=${contrato.id}`} className="flex-1 sm:flex-initial">
+            <Button size="sm" className="w-full">+ Nueva Orden</Button>
           </Link>
         </div>
         {(!contrato.ordenes || contrato.ordenes.length === 0) ? (
