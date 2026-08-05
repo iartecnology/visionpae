@@ -103,6 +103,14 @@ export class RuplService {
     return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
   }
 
+  private singular(nombre: string) {
+    const n = this.normalizarNombre(nombre);
+    if (n.endsWith('ces')) return n.slice(0, -3) + 'z';
+    if (n.endsWith('es') && n.length > 3) return n.slice(0, -2);
+    if (n.endsWith('s') && n.length > 2) return n.slice(0, -1);
+    return n;
+  }
+
   private defaultsAtributos(schema: any): any {
     if (!schema || typeof schema !== 'object') return undefined;
     const out: any = {};
@@ -118,9 +126,13 @@ export class RuplService {
       if (!base) throw new BadRequestException('Producto base no encontrado');
       return base;
     }
+    if (!nombre) return null;
     const bases = await this.prisma.productoBase.findMany({ where: { tenantId: null, activo: true } });
     const target = this.normalizarNombre(nombre);
-    return bases.find((b) => this.normalizarNombre(b.nombre) === target) || null;
+    const byExact = bases.find((b) => this.normalizarNombre(b.nombre) === target);
+    if (byExact) return byExact;
+    const singularTarget = this.singular(nombre);
+    return bases.find((b) => this.normalizarNombre(b.nombre) === singularTarget) || null;
   }
 
   private async prepararProductoData(data: any) {
