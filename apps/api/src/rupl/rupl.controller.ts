@@ -33,7 +33,9 @@ export class RuplController {
     @Query('limit') limit?: number,
     @Req() req?: any,
   ) {
-    return this.rupl.misProductos(req.user.id, page ?? 1, limit ?? 50);
+    const p = Number(page) || 1;
+    const l = Number(limit) || 50;
+    return this.rupl.misProductos(req.user.id, p, l);
   }
 
   @Post('/mis-productos')
@@ -129,7 +131,9 @@ export class RuplController {
     @Query('limit') limit?: number,
     @Req() req?: any,
   ) {
-    return this.rupl.listarProductos(id, req.user.tenantId, page, limit);
+    const p = Number(page) || 1;
+    const l = Number(limit) || 50;
+    return this.rupl.listarProductos(id, req.user.tenantId, p, l);
   }
 
   @Patch(':id/productos/:prodId')
