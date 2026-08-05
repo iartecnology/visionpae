@@ -13,9 +13,11 @@ interface ProductoBase {
   codigoUnspsc: string | null;
   codigoSipsa: string | null;
   certificacionesRequeridas: string[];
+  atributosSchema: Record<string, string[]> | null;
   fotoUrl: string | null;
   activo: boolean;
   createdAt: string;
+  _count?: { ofrecidos: number };
 }
 
 const categoriaOpts = [
@@ -54,7 +56,7 @@ export default function AdminCatalogoPage() {
   const [categoria, setCategoria] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ nombre: '', categoria: 'fruta', unidadMedidaDefecto: 'kg', codigoUnspsc: '', codigoSipsa: '', certificacionesRequeridas: '' });
+  const [form, setForm] = useState({ nombre: '', categoria: 'fruta', unidadMedidaDefecto: 'kg', codigoUnspsc: '', codigoSipsa: '', certificacionesRequeridas: '', fotoUrl: '', atributos: [] as { key: string; options: string }[] });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const load = useCallback(async () => {
@@ -81,6 +83,15 @@ export default function AdminCatalogoPage() {
     };
     if (form.codigoUnspsc) payload.codigoUnspsc = form.codigoUnspsc;
     if (form.codigoSipsa) payload.codigoSipsa = form.codigoSipsa;
+    if (form.fotoUrl) payload.fotoUrl = form.fotoUrl;
+
+    const schema: Record<string, string[]> = {};
+    for (const a of form.atributos) {
+      const key = a.key.trim();
+      if (!key) continue;
+      schema[key] = a.options.split(',').map((s) => s.trim()).filter(Boolean);
+    }
+    payload.atributosSchema = schema;
 
     if (editing) {
       await api.patch(`/catalogo/productos/${editing}`, payload);
@@ -89,13 +100,14 @@ export default function AdminCatalogoPage() {
     }
     setEditing(null);
     setShowForm(false);
-    setForm({ nombre: '', categoria: 'fruta', unidadMedidaDefecto: 'kg', codigoUnspsc: '', codigoSipsa: '', certificacionesRequeridas: '' });
+    setForm({ nombre: '', categoria: 'fruta', unidadMedidaDefecto: 'kg', codigoUnspsc: '', codigoSipsa: '', certificacionesRequeridas: '', fotoUrl: '', atributos: [] });
     load();
   };
 
   const handleEdit = (item: ProductoBase) => {
     setEditing(item.id);
     setShowForm(true);
+    const schema = item.atributosSchema || {};
     setForm({
       nombre: item.nombre,
       categoria: item.categoria,
@@ -103,6 +115,8 @@ export default function AdminCatalogoPage() {
       codigoUnspsc: item.codigoUnspsc || '',
       codigoSipsa: item.codigoSipsa || '',
       certificacionesRequeridas: item.certificacionesRequeridas?.join(', ') || '',
+      fotoUrl: item.fotoUrl || '',
+      atributos: Object.entries(schema).map(([key, options]) => ({ key, options: (options || []).join(', ') })),
     });
   };
 
@@ -146,7 +160,7 @@ export default function AdminCatalogoPage() {
             {categoriaOpts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
           <button
-            onClick={() => { setEditing(null); setShowForm(true); setForm({ nombre: '', categoria: 'fruta', unidadMedidaDefecto: 'kg', codigoUnspsc: '', codigoSipsa: '', certificacionesRequeridas: '' }); }}
+            onClick={() => { setEditing(null); setShowForm(true); setForm({ nombre: '', categoria: 'fruta', unidadMedidaDefecto: 'kg', codigoUnspsc: '', codigoSipsa: '', certificacionesRequeridas: '', fotoUrl: '', atributos: [] }); }}
             className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             + Nuevo Producto Base
@@ -188,7 +202,7 @@ export default function AdminCatalogoPage() {
 
         <div className="mt-3 sm:hidden">
           <button
-            onClick={() => { setEditing(null); setShowForm(true); setForm({ nombre: '', categoria: 'fruta', unidadMedidaDefecto: 'kg', codigoUnspsc: '', codigoSipsa: '', certificacionesRequeridas: '' }); }}
+            onClick={() => { setEditing(null); setShowForm(true); setForm({ nombre: '', categoria: 'fruta', unidadMedidaDefecto: 'kg', codigoUnspsc: '', codigoSipsa: '', certificacionesRequeridas: '', fotoUrl: '', atributos: [] }); }}
             className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
           >
             + Nuevo Producto Base
@@ -229,6 +243,57 @@ export default function AdminCatalogoPage() {
               <label className="mb-1 block text-xs font-medium text-slate-600">Certificaciones Requeridas</label>
               <input value={form.certificacionesRequeridas} onChange={(e) => setForm({ ...form, certificacionesRequeridas: e.target.value })} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" placeholder="ICA, BPA (separado por coma)" />
             </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label className="mb-1 block text-xs font-medium text-slate-600">Foto (URL)</label>
+              <input value={form.fotoUrl} onChange={(e) => setForm({ ...form, fotoUrl: e.target.value })} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500" placeholder="/img/productos/tomate.jpg" />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <div className="mb-1 flex items-center justify-between">
+                <label className="block text-xs font-medium text-slate-600">Atributos de la plantilla</label>
+                <button
+                  onClick={() => setForm({ ...form, atributos: [...form.atributos, { key: '', options: '' }] })}
+                  className="text-xs font-medium text-emerald-600 hover:text-emerald-800"
+                >
+                  + Agregar atributo
+                </button>
+              </div>
+              <p className="mb-2 text-[11px] text-slate-400">Ej: variedad → sabanera, pastusa, criolla | procedencia → nacional</p>
+              <div className="space-y-2">
+                {form.atributos.length === 0 && (
+                  <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-xs text-slate-400">Sin atributos definidos</p>
+                )}
+                {form.atributos.map((a, i) => (
+                  <div key={i} className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-slate-50/50 p-2 sm:flex-row">
+                    <input
+                      value={a.key}
+                      onChange={(e) => {
+                        const next = [...form.atributos];
+                        next[i] = { ...next[i], key: e.target.value };
+                        setForm({ ...form, atributos: next });
+                      }}
+                      placeholder="clave"
+                      className="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-emerald-500 sm:w-40"
+                    />
+                    <input
+                      value={a.options}
+                      onChange={(e) => {
+                        const next = [...form.atributos];
+                        next[i] = { ...next[i], options: e.target.value };
+                        setForm({ ...form, atributos: next });
+                      }}
+                      placeholder="opción1, opción2, opción3"
+                      className="w-full flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      onClick={() => setForm({ ...form, atributos: form.atributos.filter((_, j) => j !== i) })}
+                      className="shrink-0 rounded-lg px-2 text-xs text-red-500 hover:bg-red-50"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <div className="mt-4 flex gap-2">
             <button onClick={handleSave} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">Guardar</button>
@@ -251,6 +316,7 @@ export default function AdminCatalogoPage() {
                   <th className="px-4 py-3 text-left font-medium text-slate-600">UNSPSC</th>
                   <th className="px-4 py-3 text-left font-medium text-slate-600">SIPSA</th>
                   <th className="px-4 py-3 text-left font-medium text-slate-600">Certificaciones</th>
+                  <th className="px-4 py-3 text-left font-medium text-slate-600">En uso</th>
                   <th className="px-4 py-3 text-left font-medium text-slate-600">Estado</th>
                   <th className="px-4 py-3"></th>
                 </tr>
@@ -258,11 +324,26 @@ export default function AdminCatalogoPage() {
               <tbody>
                 {items.map((item) => (
                   <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50/50">
-                    <td className="px-4 py-3 font-medium text-slate-800">{item.nombre}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {item.fotoUrl ? (
+                          <img src={item.fotoUrl} alt="" className="h-8 w-8 rounded-lg object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        ) : null}
+                        <span className="font-medium text-slate-800">{item.nombre}</span>
+                        {item.atributosSchema && Object.keys(item.atributosSchema).length > 0 && (
+                          <span className="block text-[10px] text-slate-400">{Object.entries(item.atributosSchema).map(([k, v]) => `${k}: ${v.join('|')}`).join(' · ')}</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-slate-500"><span className="rounded bg-slate-100 px-2 py-0.5 text-xs">{item.categoria}</span></td>
                     <td className="px-4 py-3 font-mono text-xs text-slate-400">{item.codigoUnspsc || '—'}</td>
                     <td className="px-4 py-3 font-mono text-xs text-slate-400">{item.codigoSipsa || '—'}</td>
                     <td className="px-4 py-3 text-xs text-slate-400">{item.certificacionesRequeridas?.join(', ') || '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded px-2 py-0.5 text-xs ${item._count?.ofrecidos ? 'bg-sky-50 text-sky-600' : 'bg-slate-100 text-slate-400'}`}>
+                        {item._count?.ofrecidos ?? 0} ofrecido{(item._count?.ofrecidos ?? 0) !== 1 ? 's' : ''}
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       <span className={`rounded px-2 py-0.5 text-xs ${item.activo ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
                         {item.activo ? 'Activo' : 'Inactivo'}
@@ -275,7 +356,7 @@ export default function AdminCatalogoPage() {
                   </tr>
                 ))}
                 {items.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-400">No hay productos base registrados</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-sm text-slate-400">No hay productos base registrados</td></tr>
                 )}
               </tbody>
             </table>
@@ -289,13 +370,26 @@ export default function AdminCatalogoPage() {
               items.map((item) => (
                 <div key={item.id} className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.06)]">
                   <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800">{item.nombre}</p>
-                      <span className="mt-1 inline-block rounded bg-slate-100 px-2 py-0.5 text-[10px]">{item.categoria}</span>
+                    <div className="flex items-center gap-2">
+                      {item.fotoUrl ? (
+                        <img src={item.fotoUrl} alt="" className="h-10 w-10 rounded-lg object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      ) : null}
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{item.nombre}</p>
+                        <span className="mt-1 inline-block rounded bg-slate-100 px-2 py-0.5 text-[10px]">{item.categoria}</span>
+                        {item.atributosSchema && Object.keys(item.atributosSchema).length > 0 && (
+                          <p className="mt-1 text-[10px] text-slate-400">{Object.entries(item.atributosSchema).map(([k, v]) => `${k}: ${v.join('|')}`).join(' · ')}</p>
+                        )}
+                      </div>
                     </div>
-                    <span className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-medium ${item.activo ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
-                      {item.activo ? 'Activo' : 'Inactivo'}
-                    </span>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className={`rounded px-2 py-0.5 text-[10px] font-medium ${item._count?.ofrecidos ? 'bg-sky-50 text-sky-600' : 'bg-slate-100 text-slate-400'}`}>
+                        {item._count?.ofrecidos ?? 0} ofrecido{(item._count?.ofrecidos ?? 0) !== 1 ? 's' : ''}
+                      </span>
+                      <span className={`rounded px-2 py-0.5 text-[10px] font-medium ${item.activo ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                        {item.activo ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </div>
                   </div>
                   <div className="mt-2 space-y-1 text-xs text-slate-500">
                     {item.codigoUnspsc && <p><span className="text-slate-400">UNSPSC:</span> {item.codigoUnspsc}</p>}

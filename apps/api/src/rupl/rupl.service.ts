@@ -99,15 +99,53 @@ export class RuplService {
     return productor;
   }
 
+  private normalizarNombre(s: string) {
+    return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  }
+
+  private defaultsAtributos(schema: any): any {
+    if (!schema || typeof schema !== 'object') return undefined;
+    const out: any = {};
+    for (const [key, values] of Object.entries<any>(schema)) {
+      if (Array.isArray(values) && values.length) out[key] = values[0];
+    }
+    return Object.keys(out).length ? out : undefined;
+  }
+
+  private async resolverProductoBase(productoBaseId: string | undefined, nombre: string) {
+    if (productoBaseId) {
+      const base = await this.prisma.productoBase.findUnique({ where: { id: productoBaseId } });
+      if (!base) throw new BadRequestException('Producto base no encontrado');
+      return base;
+    }
+    const bases = await this.prisma.productoBase.findMany({ where: { tenantId: null, activo: true } });
+    const target = this.normalizarNombre(nombre);
+    return bases.find((b) => this.normalizarNombre(b.nombre) === target) || null;
+  }
+
+  private async prepararProductoData(data: any) {
+    const base = await this.resolverProductoBase(data.productoBaseId, data.nombre ?? '');
+    const out: any = { ...data };
+    if (base) {
+      out.productoBaseId = base.id;
+      out.nombre = base.nombre;
+      out.categoria = base.categoria;
+      out.unidadMedida = out.unidadMedida ?? base.unidadMedidaDefecto;
+      if (!out.atributos) out.atributos = this.defaultsAtributos(base.atributosSchema);
+    }
+    return out;
+  }
+
   async agregarProducto(productorId: string, data: CrearProductoOfrecidoDto, tenantId: string, roles?: string[]) {
     const productor = await this.resolverProductor(productorId, tenantId, roles);
     const isAdmin = roles?.some((r) => ['super_admin', 'admin_entidad'].includes(r));
 
     const { presentaciones, ...productData } = data;
+    const resolved = await this.prepararProductoData(productData);
 
     const producto = await this.prisma.productoOfrecido.create({
       data: {
-        ...productData as any,
+        ...resolved as any,
         productorId,
         tenantId: isAdmin ? productor.tenantId : tenantId,
       },
@@ -296,7 +334,10 @@ export class RuplService {
     const isAdmin = roles?.some((r) => ['super_admin', 'admin_entidad'].includes(r));
     const producto = await this.prisma.productoOfrecido.findFirst({
       where: isAdmin ? { id } : { id, tenantId },
-      include: { presentaciones: true },
+      include: {
+        presentaciones: true,
+        productoBase: { select: { id: true, nombre: true, fotoUrl: true, atributosSchema: true, unidadMedidaDefecto: true, categoria: true } },
+      },
     });
     if (!producto) throw new NotFoundException('Producto no encontrado');
     return producto;
@@ -307,9 +348,10 @@ export class RuplService {
     const producto = await this.prisma.productoOfrecido.findFirst({ where: isAdmin ? { id } : { id, tenantId } });
     if (!producto) throw new NotFoundException('Producto no encontrado');
 
+    const resolved = await this.prepararProductoData(data);
     return this.prisma.productoOfrecido.update({
       where: { id },
-      data: data as any,
+      data: resolved as any,
     });
   }
 
@@ -351,10 +393,11 @@ export class RuplService {
   async crearMiProducto(userId: string, data: CrearProductoOfrecidoDto) {
     const productor = await this.findProductorByUserId(userId);
     const { presentaciones, ...productData } = data;
+    const resolved = await this.prepararProductoData(productData);
 
     const producto = await this.prisma.productoOfrecido.create({
       data: {
-        ...productData as any,
+        ...resolved as any,
         productorId: productor.id,
         tenantId: productor.tenantId,
       },
@@ -386,9 +429,10 @@ export class RuplService {
     });
     if (!producto) throw new NotFoundException('Producto no encontrado');
 
+    const resolved = await this.prepararProductoData(data);
     return this.prisma.productoOfrecido.update({
       where: { id: prodId },
-      data: data as any,
+      data: resolved as any,
     });
   }
 
@@ -409,7 +453,10 @@ export class RuplService {
     const productor = await this.findProductorByUserId(userId);
     const producto = await this.prisma.productoOfrecido.findFirst({
       where: { id: prodId, productorId: productor.id },
-      include: { presentaciones: true },
+      include: {
+        presentaciones: true,
+        productoBase: { select: { id: true, nombre: true, fotoUrl: true, atributosSchema: true, unidadMedidaDefecto: true, categoria: true } },
+      },
     });
     if (!producto) throw new NotFoundException('Producto no encontrado');
     return producto;
@@ -418,6 +465,7 @@ export class RuplService {
   async buscarProductos(filtros: {
     q?: string;
     categoria?: string;
+    productoBaseId?: string;
     codigoMunicipio?: string;
     tenantId?: string;
     page?: number;
@@ -425,7 +473,13 @@ export class RuplService {
   }) {
     const where: any = { activo: true };
     if (filtros.categoria) where.categoria = filtros.categoria;
-    if (filtros.q) where.nombre = { contains: filtros.q, mode: 'insensitive' };
+    if (filtros.productoBaseId) where.productoBaseId = filtros.productoBaseId;
+    if (filtros.q) {
+      where.OR = [
+        { nombre: { contains: filtros.q, mode: 'insensitive' } },
+        { productoBase: { nombre: { contains: filtros.q, mode: 'insensitive' } } },
+      ];
+    }
 
     if (filtros.codigoMunicipio) {
       where.productor = { codigoMunicipio: filtros.codigoMunicipio };
@@ -435,6 +489,9 @@ export class RuplService {
     const items = await this.prisma.productoOfrecido.findMany({
       where,
       include: {
+        productoBase: {
+          select: { id: true, nombre: true, fotoUrl: true, categoria: true, unidadMedidaDefecto: true },
+        },
         productor: {
           select: {
             id: true, razonSocial: true, nombreComercial: true, codigoMunicipio: true, calificacionPromedio: true,

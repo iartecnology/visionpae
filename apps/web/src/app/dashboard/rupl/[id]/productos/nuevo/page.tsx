@@ -64,6 +64,8 @@ export default function NuevoProductoPage() {
     precioReferencia: '',
   });
   const [presentaciones, setPresentaciones] = useState<{ nombre: string; volumen: string; unidadMedida: string; precio: string; stock: string }[]>([]);
+  const [baseSchema, setBaseSchema] = useState<Record<string, string[]> | null>(null);
+  const [atributos, setAtributos] = useState<Record<string, string>>({});
 
   const buscarBase = useCallback(async (q: string) => {
     if (!q || q.length < 2) { setBaseResults([]); return; }
@@ -89,6 +91,14 @@ export default function NuevoProductoPage() {
       volumenDisponible: '',
       precioReferencia: '',
     });
+    setBaseSchema(pb.atributosSchema || null);
+    const defaults: Record<string, string> = {};
+    if (pb.atributosSchema) {
+      for (const [key, opts] of Object.entries<any>(pb.atributosSchema)) {
+        if (Array.isArray(opts) && opts.length) defaults[key] = opts[0];
+      }
+    }
+    setAtributos(defaults);
     setShowBaseSearch(false);
     setBaseResults([]);
     setBaseQuery('');
@@ -96,6 +106,8 @@ export default function NuevoProductoPage() {
 
   const limpiarBase = () => {
     setForm({ productoBaseId: '', nombre: '', categoria: 'fruta', unidadMedida: 'kg', volumenDisponible: '', precioReferencia: '' });
+    setBaseSchema(null);
+    setAtributos({});
     setShowBaseSearch(true);
   };
 
@@ -129,6 +141,7 @@ export default function NuevoProductoPage() {
         volumenDisponible: parseFloat(form.volumenDisponible),
         precioReferencia: form.precioReferencia ? parseFloat(form.precioReferencia) : undefined,
       };
+      if (Object.keys(atributos).length > 0) payload.atributos = atributos;
       if (presentaciones.length > 0) {
         payload.presentaciones = presentaciones.map((p) => ({
           nombre: p.nombre,
@@ -211,8 +224,27 @@ export default function NuevoProductoPage() {
           <CardContent className="space-y-4 pt-4">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-600">Nombre del Producto</label>
-              <Input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Tomate Chonto" />
+              <Input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Tomate Chonto" disabled={!!form.productoBaseId} />
+              {form.productoBaseId && <p className="mt-1 text-[10px] text-emerald-600">El nombre proviene de la plantilla seleccionada</p>}
             </div>
+
+            {baseSchema && Object.keys(baseSchema).length > 0 && (
+              <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-3">
+                <p className="mb-2 text-xs font-medium text-slate-600">Características del producto</p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {Object.entries(baseSchema).map(([key, opts]) => (
+                    <div key={key}>
+                      <label className="mb-1 block text-xs font-medium capitalize text-slate-600">{key}</label>
+                      <Select
+                        options={opts.map((o) => ({ value: o, label: o }))}
+                        value={atributos[key] || ''}
+                        onChange={(e) => setAtributos({ ...atributos, [key]: e.target.value })}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

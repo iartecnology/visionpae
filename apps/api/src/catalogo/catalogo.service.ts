@@ -30,6 +30,9 @@ export class CatalogoService {
       orderBy: { nombre: 'asc' },
       skip: (filtros.page - 1) * filtros.limit,
       take: filtros.limit,
+      include: {
+        _count: { select: { ofrecidos: { where: { activo: true } } } },
+      },
     });
 
     return { data: items, meta: { page: filtros.page, limit: filtros.limit, total } };

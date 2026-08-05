@@ -311,6 +311,10 @@ export class BuscarProductoDto {
 
   @IsOptional()
   @IsString()
+  productoBaseId?: string;
+
+  @IsOptional()
+  @IsString()
   codigoMunicipio?: string;
 
   @IsOptional()
