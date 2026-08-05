@@ -71,8 +71,13 @@ services:
       POSTGRES_DB: pae_prod
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
+      DB_REMOTE_USER: ${DB_REMOTE_USER}
+      DB_REMOTE_PASSWORD: ${DB_REMOTE_PASSWORD}
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata_prod:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d pae_prod"]
       interval: 10s

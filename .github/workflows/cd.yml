@@ -22,9 +22,11 @@ jobs:
           script: |
             cd /opt/pae
             git fetch origin main && git checkout --force origin/main 2>/dev/null || true
+            set -a; source /opt/pae/.env.production; set +a
             export GITHUB_REPOSITORY=${{ github.repository }}
             docker compose -f docker/prod/docker-compose.yml pull
             docker compose -f docker/prod/docker-compose.yml up -d --remove-orphans
+            docker compose -f docker/prod/docker-compose.yml exec -T db sh /docker-entrypoint-initdb.d/01-create-remote-user.sh
             docker image prune -f
 
   deploy-production:
@@ -42,8 +44,10 @@ jobs:
           script: |
             cd /opt/pae
             git fetch origin main && git checkout --force origin/main 2>/dev/null || true
+            set -a; source /opt/pae/.env.production; set +a
             export GITHUB_REPOSITORY=${{ github.repository }}
             IMAGE_TAG=${{ github.sha }} \
             docker compose -f docker/prod/docker-compose.yml pull
             docker compose -f docker/prod/docker-compose.yml up -d --remove-orphans
+            docker compose -f docker/prod/docker-compose.yml exec -T db sh /docker-entrypoint-initdb.d/01-create-remote-user.sh
             docker system prune -af --filter "until=24h"
