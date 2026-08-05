@@ -52,7 +52,7 @@ jobs:
           file: apps/api/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}/api:latest,ghcr.io/${{ github.repository }}/api:${{ github.sha }}
-          cache-from: type=gha
+          cache-from: type=gha,ignore-error=true
           cache-to: type=gha,mode=max,ignore-error=true
       - name: Build & Push Web
         uses: docker/build-push-action@v5
@@ -61,7 +61,7 @@ jobs:
           file: apps/web/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}/web:latest,ghcr.io/${{ github.repository }}/web:${{ github.sha }}
-          cache-from: type=gha
+          cache-from: type=gha,ignore-error=true
           cache-to: type=gha,mode=max,ignore-error=true
       - name: Build & Push Worker
         uses: docker/build-push-action@v5
@@ -70,7 +70,7 @@ jobs:
           file: apps/worker/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}/worker:latest,ghcr.io/${{ github.repository }}/worker:${{ github.sha }}
-          cache-from: type=gha
+          cache-from: type=gha,ignore-error=true
           cache-to: type=gha,mode=max,ignore-error=true
       - name: Build & Push Mobile-Sync
         uses: docker/build-push-action@v5
@@ -79,5 +79,5 @@ jobs:
           file: apps/mobile-sync/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}/mobile-sync:latest,ghcr.io/${{ github.repository }}/mobile-sync:${{ github.sha }}
-          cache-from: type=gha
+          cache-from: type=gha,ignore-error=true
           cache-to: type=gha,mode=max,ignore-error=true
