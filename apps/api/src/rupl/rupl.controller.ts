@@ -136,6 +136,16 @@ export class RuplController {
     return this.rupl.listarProductos(id, req.user.tenantId, p, l);
   }
 
+  @Get(':id/productos/:prodId')
+  @UseGuards(AuthGuard('jwt'))
+  async obtenerProducto(
+    @Param('id') id: string,
+    @Param('prodId') prodId: string,
+    @Req() req: any,
+  ) {
+    return this.rupl.obtenerProducto(prodId, req.user.tenantId);
+  }
+
   @Patch(':id/productos/:prodId')
   @UseGuards(AuthGuard('jwt'))
   async actualizarProducto(

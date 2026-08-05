@@ -281,6 +281,15 @@ export class RuplService {
 
   // ---- Producto (actualizar estacionalidad) ----
 
+  async obtenerProducto(id: string, tenantId: string) {
+    const producto = await this.prisma.productoOfrecido.findFirst({
+      where: { id, tenantId },
+      include: { presentaciones: true },
+    });
+    if (!producto) throw new NotFoundException('Producto no encontrado');
+    return producto;
+  }
+
   async actualizarProducto(id: string, data: any, tenantId: string) {
     const producto = await this.prisma.productoOfrecido.findFirst({ where: { id, tenantId } });
     if (!producto) throw new NotFoundException('Producto no encontrado');

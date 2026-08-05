@@ -177,6 +177,7 @@ export default function DetalleProductorPage() {
                 <div className="flex items-center gap-2 text-right text-sm">
                   {p.precioReferencia ? <span className="text-slate-600">{formatCurrency(p.precioReferencia)}</span> : null}
                   <Link href={`/dashboard/rupl/${params.id}/productos/${p.id}/estacionalidad`} className="text-xs text-emerald-600 hover:text-emerald-700">📅</Link>
+                  <Link href={`/dashboard/rupl/${params.id}/productos/${p.id}/editar`} className="text-xs text-emerald-600 hover:text-emerald-700">✏️</Link>
                   <span className={`inline-block h-2 w-2 rounded-full ${p.activo ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                 </div>
               </div>
