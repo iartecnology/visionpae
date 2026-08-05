@@ -63,3 +63,21 @@ jobs:
           tags: ghcr.io/${{ github.repository }}/web:latest,ghcr.io/${{ github.repository }}/web:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max,ignore-error=true
+      - name: Build & Push Worker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/worker/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/worker:latest,ghcr.io/${{ github.repository }}/worker:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max,ignore-error=true
+      - name: Build & Push Mobile-Sync
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/mobile-sync/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/mobile-sync:latest,ghcr.io/${{ github.repository }}/mobile-sync:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max,ignore-error=true
