@@ -90,9 +90,18 @@ export class RuplService {
     });
   }
 
-  async agregarProducto(productorId: string, data: CrearProductoOfrecidoDto, tenantId: string) {
-    const productor = await this.prisma.productor.findFirst({ where: { id: productorId, tenantId } });
+  private async resolverProductor(productorId: string, tenantId: string, roles?: string[]) {
+    const isAdmin = roles?.some((r) => ['super_admin', 'admin_entidad'].includes(r));
+    const productor = isAdmin
+      ? await this.prisma.productor.findUnique({ where: { id: productorId } })
+      : await this.prisma.productor.findFirst({ where: { id: productorId, tenantId } });
     if (!productor) throw new NotFoundException('Productor no encontrado');
+    return productor;
+  }
+
+  async agregarProducto(productorId: string, data: CrearProductoOfrecidoDto, tenantId: string, roles?: string[]) {
+    const productor = await this.resolverProductor(productorId, tenantId, roles);
+    const isAdmin = roles?.some((r) => ['super_admin', 'admin_entidad'].includes(r));
 
     const { presentaciones, ...productData } = data;
 
@@ -100,7 +109,7 @@ export class RuplService {
       data: {
         ...productData as any,
         productorId,
-        tenantId,
+        tenantId: isAdmin ? productor.tenantId : tenantId,
       },
     });
 
@@ -123,8 +132,10 @@ export class RuplService {
     });
   }
 
-  async listarProductos(productorId: string, tenantId: string, page = 1, limit = 50) {
-    const where = { productorId, tenantId, activo: true };
+  async listarProductos(productorId: string, tenantId: string, page = 1, limit = 50, roles?: string[]) {
+    const productor = await this.resolverProductor(productorId, tenantId, roles);
+    const isAdmin = roles?.some((r) => ['super_admin', 'admin_entidad'].includes(r));
+    const where = { productorId, tenantId: isAdmin ? productor.tenantId : tenantId, activo: true };
     const [data, total] = await Promise.all([
       this.prisma.productoOfrecido.findMany({
         where,
@@ -281,17 +292,19 @@ export class RuplService {
 
   // ---- Producto (actualizar estacionalidad) ----
 
-  async obtenerProducto(id: string, tenantId: string) {
+  async obtenerProducto(id: string, tenantId: string, roles?: string[]) {
+    const isAdmin = roles?.some((r) => ['super_admin', 'admin_entidad'].includes(r));
     const producto = await this.prisma.productoOfrecido.findFirst({
-      where: { id, tenantId },
+      where: isAdmin ? { id } : { id, tenantId },
       include: { presentaciones: true },
     });
     if (!producto) throw new NotFoundException('Producto no encontrado');
     return producto;
   }
 
-  async actualizarProducto(id: string, data: any, tenantId: string) {
-    const producto = await this.prisma.productoOfrecido.findFirst({ where: { id, tenantId } });
+  async actualizarProducto(id: string, data: any, tenantId: string, roles?: string[]) {
+    const isAdmin = roles?.some((r) => ['super_admin', 'admin_entidad'].includes(r));
+    const producto = await this.prisma.productoOfrecido.findFirst({ where: isAdmin ? { id } : { id, tenantId } });
     if (!producto) throw new NotFoundException('Producto no encontrado');
 
     return this.prisma.productoOfrecido.update({
@@ -300,8 +313,9 @@ export class RuplService {
     });
   }
 
-  async eliminarProducto(id: string, tenantId: string) {
-    const producto = await this.prisma.productoOfrecido.findFirst({ where: { id, tenantId } });
+  async eliminarProducto(id: string, tenantId: string, roles?: string[]) {
+    const isAdmin = roles?.some((r) => ['super_admin', 'admin_entidad'].includes(r));
+    const producto = await this.prisma.productoOfrecido.findFirst({ where: isAdmin ? { id } : { id, tenantId } });
     if (!producto) throw new NotFoundException('Producto no encontrado');
 
     return this.prisma.productoOfrecido.update({

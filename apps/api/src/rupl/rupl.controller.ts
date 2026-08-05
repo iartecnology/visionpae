@@ -120,7 +120,7 @@ export class RuplController {
     @Body() dto: CrearProductoOfrecidoDto,
     @Req() req: any,
   ) {
-    return this.rupl.agregarProducto(id, dto, req.user.tenantId);
+    return this.rupl.agregarProducto(id, dto, req.user.tenantId, req.user.roles);
   }
 
   @Get(':id/productos')
@@ -133,7 +133,7 @@ export class RuplController {
   ) {
     const p = Number(page) || 1;
     const l = Number(limit) || 50;
-    return this.rupl.listarProductos(id, req.user.tenantId, p, l);
+    return this.rupl.listarProductos(id, req.user.tenantId, p, l, req.user.roles);
   }
 
   @Get(':id/productos/:prodId')
@@ -143,7 +143,7 @@ export class RuplController {
     @Param('prodId') prodId: string,
     @Req() req: any,
   ) {
-    return this.rupl.obtenerProducto(prodId, req.user.tenantId);
+    return this.rupl.obtenerProducto(prodId, req.user.tenantId, req.user.roles);
   }
 
   @Patch(':id/productos/:prodId')
@@ -154,7 +154,7 @@ export class RuplController {
     @Body() dto: any,
     @Req() req: any,
   ) {
-    return this.rupl.actualizarProducto(prodId, dto, req.user.tenantId);
+    return this.rupl.actualizarProducto(prodId, dto, req.user.tenantId, req.user.roles);
   }
 
   @Delete(':id/productos/:prodId')
@@ -164,7 +164,7 @@ export class RuplController {
     @Param('prodId') prodId: string,
     @Req() req: any,
   ) {
-    return this.rupl.eliminarProducto(prodId, req.user.tenantId);
+    return this.rupl.eliminarProducto(prodId, req.user.tenantId, req.user.roles);
   }
 
   // ---- Calificación ----
