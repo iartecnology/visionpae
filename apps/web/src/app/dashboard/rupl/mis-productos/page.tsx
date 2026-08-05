@@ -16,6 +16,7 @@ interface ProductoOfrecido {
   activo: boolean;
   estadoOferta: string;
   createdAt: string;
+  fotos: string[];
   presentaciones: {
     id: string;
     nombre: string;
@@ -108,6 +109,12 @@ export default function MisProductosPage() {
                   {p.estadoOferta}
                 </span>
               </div>
+              {p.fotos?.length > 0 && (
+                <div className="relative mb-3 h-40 w-full overflow-hidden rounded-lg bg-slate-50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.fotos[0]} alt={p.nombre} className="h-full w-full object-cover" />
+                </div>
+              )}
               <h3 className="text-base font-semibold text-slate-800">{p.nombre}</h3>
               <p className="text-xs text-slate-400">
                 {p.volumenDisponible} {p.unidadMedida} disponibles

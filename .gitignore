@@ -4,6 +4,8 @@ dist/
 .turbo/
 .env
 .env.local
+.env.production
+.env.*.local
 *.log
 .DS_Store
 docker/prod/nginx/ssl/
