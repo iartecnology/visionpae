@@ -16,7 +16,7 @@ services:
 
   api:
     container_name: VisionPAE
-    image: ghcr.io/${GITHUB_REPOSITORY:-visionpae}/api:${IMAGE_TAG:-latest}
+    image: ghcr.io/${GITHUB_REPOSITORY:-iartecnology/visionpae}/api:${IMAGE_TAG:-latest}
     restart: always
     env_file: ../../.env.production
     environment:
@@ -31,7 +31,7 @@ services:
 
   web:
     container_name: VisionPAE-Web
-    image: ghcr.io/${GITHUB_REPOSITORY:-visionpae}/web:${IMAGE_TAG:-latest}
+    image: ghcr.io/${GITHUB_REPOSITORY:-iartecnology/visionpae}/web:${IMAGE_TAG:-latest}
     restart: always
     env_file: ../../.env.production
     environment:
@@ -43,7 +43,7 @@ services:
 
   worker:
     container_name: VisionPAE-Worker
-    image: ghcr.io/${GITHUB_REPOSITORY:-visionpae}/worker:${IMAGE_TAG:-latest}
+    image: ghcr.io/${GITHUB_REPOSITORY:-iartecnology/visionpae}/worker:${IMAGE_TAG:-latest}
     restart: always
     env_file: ../../.env.production
     depends_on:
@@ -54,7 +54,7 @@ services:
 
   mobile-sync:
     container_name: VisionPAE-MobileSync
-    image: ghcr.io/${GITHUB_REPOSITORY:-visionpae}/mobile-sync:${IMAGE_TAG:-latest}
+    image: ghcr.io/${GITHUB_REPOSITORY:-iartecnology/visionpae}/mobile-sync:${IMAGE_TAG:-latest}
     restart: always
     env_file: ../../.env.production
     depends_on:
