@@ -437,7 +437,7 @@ export class RuplService {
       include: {
         productor: {
           select: {
-            razonSocial: true, nombreComercial: true, codigoMunicipio: true, calificacionPromedio: true,
+            id: true, razonSocial: true, nombreComercial: true, codigoMunicipio: true, calificacionPromedio: true,
           },
         },
       },

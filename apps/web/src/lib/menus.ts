@@ -26,6 +26,7 @@ export interface MenuItem {
   icon: React.ComponentType<{ className?: string }>;
   recurso?: string;
   featureFlag?: string;
+  roles?: string[];
   children?: MenuItem[];
 }
 
@@ -34,6 +35,7 @@ export const menuDefs: MenuItem[] = [
   { label: 'Explorar', href: '/dashboard/explorar', icon: Map },
   { label: 'Catálogo', href: '/dashboard/catalogo', icon: Package },
   { label: 'RUPL Productores', href: '/dashboard/rupl', icon: Users },
+  { label: 'Productos Ofrecidos', href: '/dashboard/rupl/productos-ofrecidos', icon: Package, recurso: 'rupl', roles: ['super_admin', 'admin_entidad'] },
   { label: 'Mis Productos', href: '/dashboard/rupl/mis-productos', icon: Package, recurso: 'mis_productos' },
   { label: 'Compras', href: '/dashboard/compras', icon: ShoppingCart, recurso: 'compras' },
   { label: 'Certificaciones', href: '/dashboard/certificaciones', icon: FileCheck, recurso: 'certificaciones' },

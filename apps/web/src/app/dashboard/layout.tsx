@@ -130,8 +130,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (!recurso) return true;
       return permissions.includes(`${recurso}:consultar`);
     };
-    return menuDefs.filter((item) => hasPerm(item.recurso));
-  }, [permissions]);
+    const hasRole = (roles?: string[]) => {
+      if (!roles || roles.length === 0) return true;
+      return roles.includes(userRole || '');
+    };
+    return menuDefs.filter((item) => hasPerm(item.recurso) && hasRole(item.roles));
+  }, [permissions, userRole]);
 
   const visibleAdminMenu = useMemo(() => {
     const hasPerm = (recurso?: string) => {
